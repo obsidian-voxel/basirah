@@ -109,10 +109,9 @@ dependencies {
     implementation("com.google.ai.edge.litert:litert-api:1.4.2")
     // FileProvider for handing the camera app a private output file.
     implementation("androidx.core:core-ktx:1.13.1")
-    // Bundled, offline face detection (ML Kit). Replaces the old skin-component
-    // heuristic: a real face box is the only face truth the exposure rule uses.
-    implementation("com.google.mlkit:face-detection:16.1.7")
-    implementation("com.google.android.gms:play-services-tasks:18.2.0")
+    // Face detection runs on MediaPipe's BlazeFace short-range model
+    // (Apache-2.0, bundled in src/main/assets/models) through LiteRT, so the
+    // app carries no proprietary ML Kit blobs and can be built by F-Droid.
     // JVM-only tests for pure geometry (no Android framework stubs needed).
     testImplementation("junit:junit:4.13.2")
 }

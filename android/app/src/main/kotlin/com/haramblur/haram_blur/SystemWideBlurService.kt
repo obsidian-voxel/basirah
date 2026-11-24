@@ -963,7 +963,7 @@ class SystemWideBlurService : AccessibilityService() {
         val sensitivity = prefs.getInt(MainActivity.KEY_SENSITIVITY, 5)
         // Real face boxes, normalised to this working frame. Detection runs on
         // the capture thread; no face means the exposure rule has no exclusion.
-        val faces = FaceBoxes.detect(frame.preview)
+        val faces = FaceBoxes.detect(this, frame.preview)
         detector.analyze(
             frame,
             sensitivity,

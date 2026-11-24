@@ -329,7 +329,7 @@ class MainActivity : FlutterActivity() {
                                 if (bitmap == null) {
                                     result.error("decode_failed", "Could not decode image", null)
                                 } else {
-                                    val faces = FaceBoxes.detect(bitmap)
+                                    val faces = FaceBoxes.detect(this@MainActivity, bitmap)
                                     bitmap.recycle()
                                     Log.i(TAG, "detectFaces: ${faces.size} face(s)")
                                     result.success(faces)

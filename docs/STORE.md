@@ -71,13 +71,13 @@ ads, no purchases, no location and no personal information. Target audience:
 ## F-Droid
 
 F-Droid builds from source on its own builders and refuses apps that depend on
-proprietary libraries or ship non-free assets. Two dependencies currently fail
-that test, and no metadata work can work around it:
+proprietary libraries or ship non-free assets. The former blocker was ML Kit
+face detection; it is now gone:
 
-| Dependency | Problem | Fix |
-|---|---|---|
-| `com.google.mlkit:face-detection:16.1.7` | Closed source, ships prebuilt native blobs | Bundle an Apache-2.0 detector (BlazeFace short-range is already in `assets/models/`) and delete this dependency |
-| `com.google.android.gms:play-services-tasks:18.2.0` | Closed source | Only used to await the ML Kit task; disappears with the fix above |
+| Former dependency | Resolution |
+|---|---|
+| `com.google.mlkit:face-detection:16.1.7` | Replaced by MediaPipe BlazeFace short-range (Apache-2.0, 229 KB at `android/app/src/main/assets/models/blaze_face_short_range.tflite`) decoded with the LiteRT runtime already in the app. See `FaceBoxes.kt`. |
+| `com.google.android.gms:play-services-tasks:18.2.0` | Removed with ML Kit; nothing else used it. |
 
 Everything else already passes: AGPL-3.0 licence, no analytics, no trackers,
 no `INTERNET` permission in the release manifest, models under
