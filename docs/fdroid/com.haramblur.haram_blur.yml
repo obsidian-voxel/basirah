@@ -1,17 +1,17 @@
-# Draft F-Droid recipe — NOT submittable yet.
+# Draft F-Droid recipe — dependency blocker resolved, submit as an MR.
 #
-# Blocked on the proprietary ML Kit face detector (see docs/STORE.md). Submit
-# this as a merge request to https://gitlab.com/fdroid/fdroiddata only after
-# com.google.mlkit:face-detection and play-services-tasks are gone from
-# android/app/build.gradle.kts, otherwise the scanner fails with
-# "NonFreeDep" and the build server has no Google Maven access anyway.
+# The former NonFreeDep blocker is gone: face detection now runs on MediaPipe
+# BlazeFace short-range (Apache-2.0) through LiteRT, and
+# com.google.mlkit:face-detection plus play-services-tasks are no longer
+# dependencies (see docs/STORE.md and FaceBoxes.kt).
 #
-# The remaining unknowns to settle with an fdroiddata maintainer before
-# opening the MR:
+# Remaining items to settle with an fdroiddata maintainer before opening the
+# MR:
 #   * Which Flutter SDK the build server provides, and whether `flutter
 #     precache --android` can run inside the build. Pinning a Flutter release
 #     through `srclibs` is the usual answer for Flutter apps.
-#   * Whether the 83 MB assets/models/nsfw_int8.tflite may stay in the source
+#   * tag `v1.0.0` below must exist on the repository before the MR.
+#   * Whether the 84 MB assets/models/nsfw_int8.tflite may stay in the source
 #     tarball. It must: the app has no INTERNET permission, so it can never
 #     download a model at runtime.
 Categories:
