@@ -1,0 +1,47 @@
+# Draft F-Droid recipe — NOT submittable yet.
+#
+# Blocked on the proprietary ML Kit face detector (see docs/STORE.md). Submit
+# this as a merge request to https://gitlab.com/fdroid/fdroiddata only after
+# com.google.mlkit:face-detection and play-services-tasks are gone from
+# android/app/build.gradle.kts, otherwise the scanner fails with
+# "NonFreeDep" and the build server has no Google Maven access anyway.
+#
+# The remaining unknowns to settle with an fdroiddata maintainer before
+# opening the MR:
+#   * Which Flutter SDK the build server provides, and whether `flutter
+#     precache --android` can run inside the build. Pinning a Flutter release
+#     through `srclibs` is the usual answer for Flutter apps.
+#   * Whether the 83 MB assets/models/nsfw_int8.tflite may stay in the source
+#     tarball. It must: the app has no INTERNET permission, so it can never
+#     download a model at runtime.
+Categories:
+  - Security
+License: AGPL-3.0-or-later
+AuthorName: Basirah contributors
+WebSite: https://github.com/obsidian-voxel/basirah
+SourceCode: https://github.com/obsidian-voxel/basirah
+IssueTracker: https://github.com/obsidian-voxel/basirah/issues
+
+AutoName: Basirah
+
+RepoType: git
+Repo: https://github.com/obsidian-voxel/basirah
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: v1.0.0
+    output: build/app/outputs/flutter-apk/app-release.apk
+    srclibs:
+      - flutter@3.35.0
+    prebuild:
+      - $$flutter$$/bin/flutter config --no-analytics
+      - $$flutter$$/bin/flutter pub get
+    build:
+      - $$flutter$$/bin/flutter build apk --release --target-platform android-arm,android-arm64
+    ndk: r27
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1

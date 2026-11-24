@@ -1,0 +1,9 @@
+First release.
+
+- On-device blur of nudity and exposed skin through one accessibility
+  service; frames are never stored or uploaded.
+- App, site and keyword blocking, calm mode, schedules and daily limits.
+- Standard protection on any Android 11+ phone, optional Hardened mode when
+  Basirah is the device owner.
+- Honest health reporting: a feature only shows as active when Android
+  confirms it.

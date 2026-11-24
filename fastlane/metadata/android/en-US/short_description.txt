@@ -1,0 +1,1 @@
+On-device blur for explicit content, plus app, site and keyword blocking.

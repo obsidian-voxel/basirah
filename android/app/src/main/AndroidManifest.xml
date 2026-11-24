@@ -15,9 +15,12 @@
          storage, overlay or foreground-service permissions are needed. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Opens the one-tap battery-exemption dialog; without it background
-         protection is killed by Doze on some OEMs. -->
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- Battery exemption is requested by opening Android's optimisation list
+         (ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS) instead of the one-tap
+         dialog. The dialog needs REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, which
+         Google Play treats as a restricted permission granted only for an
+         accepted list of use cases; a content blocker is not on that list, so
+         declaring it would put the listing at risk for no functional gain. -->
 
     <!-- Package visibility: without these, resolveActivity() returns null on
          Android 11+ and the device-admin dialog was replaced by a fallback to

@@ -770,23 +770,23 @@ class MainActivity : FlutterActivity() {
         requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQ_NOTIFICATIONS)
     }
 
+    /**
+     * Opens Android's battery-optimisation list rather than the one-tap
+     * exemption dialog. The dialog requires
+     * REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, a restricted permission Google Play
+     * grants only for an accepted list of use cases that does not include
+     * content blockers. The permission is therefore not declared; the user
+     * opens the list and picks Basirah, which grants the same exemption.
+     */
     private fun requestIgnoreBatteryOptimizations() {
         if (batteryOptimizationIgnored()) return
         try {
             startActivity(
-                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                    .setData(Uri.parse("package:$packageName"))
+                Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             )
-        } catch (_: Throwable) {
-            try {
-                startActivity(
-                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                )
-            } catch (error: Throwable) {
-                Log.e(TAG, "Could not open battery optimization settings", error)
-            }
+        } catch (error: Throwable) {
+            Log.e(TAG, "Could not open battery optimization settings", error)
         }
     }
 

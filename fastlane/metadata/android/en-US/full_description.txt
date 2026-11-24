@@ -1,0 +1,38 @@
+Basirah blurs explicit content before you see it, and blocks the apps, sites
+and keywords that lead to it. Everything runs on your phone: the app has no
+INTERNET permission at all, so it cannot send anything anywhere, even by
+mistake.
+
+HOW THE BLUR WORKS
+An Android accessibility service sees which app is in front. When the screen
+changes, Basirah takes one frame, classifies it on the device with models
+bundled inside the app, and if nudity or exposed skin is detected it draws a
+blurred copy of that frame over the screen. The frame is then discarded.
+Nothing is written to storage and nothing is uploaded.
+
+BLOCKING LAYERS
+- Apps: close the app when it opens, and hide its launcher icon.
+- Sites: block by host or URL pattern in any browser.
+- Keywords: flag the search queries and page text you choose.
+- Calm mode: allow a short list of apps and keep the session from being
+  exited.
+- Schedules and daily limits: protection that follows your day.
+
+TWO PROTECTION MODES
+- Standard works on any Android 11+ phone with the accessibility grant alone.
+- Hardened is optional and applies only when Basirah is your device owner. It
+  adds anti-removal policies -- and it reports honestly when a policy is not
+  actually in effect. There are no green ticks for anything Android has not
+  confirmed.
+
+PRIVACY BY CONSTRUCTION
+No account, no cloud, no analytics, no crash reporting, no advertising and no
+update checks. Block lists, detection history and settings live in the app's
+private storage and are deleted when you uninstall.
+
+WHAT BASIRAH DOES NOT DO
+It does not restore deleted files, hide itself from Settings, or stop someone
+who knows the device PIN from uninstalling it. It is not a parental-control
+service and it cannot watch another phone.
+
+Basirah is free software under the AGPL-3.0.
