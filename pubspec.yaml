@@ -1,0 +1,70 @@
+name: haram_blur
+description: "Basirah — on-device app that blurs explicit content in images and across the Android screen."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_litert: ^3.9.4
+  image_picker: ^1.2.4
+  image: ^4.12.0
+  shared_preferences: ^2.5.6
+  fl_chart: ^0.69.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Quantised ViT nudity classifier (88 MB, fp32 I/O). Validated on
+    # tests/eval_set: 96.7% recall at gate 0.70, 0 false positives on 40
+    # benign images. See MODEL_IO.md.
+    - assets/models/nsfw_int8.tflite
+    # Full adult-domain index: 952,260 hosts from
+    # github.com/blocklistproject/Lists porn.txt (Unlicense) as sorted 64-bit
+    # hashes. 7.3 MB here instead of 25 MB of text and ~85 MB of strings.
+    # Built by tools/build_blocklist_index.py; read by AdultDomainIndex.kt.
+    - assets/blocklists/adult_domains.idx
+    # Adult URL patterns (`*` wildcards: search queries, `.xxx` hosts).
+    # Matched against the page URL only, never against visible text.
+    - assets/blocklists/adult_url_patterns.txt
+    # Image/video search result pages, gated by the setting of the same name.
+    - assets/blocklists/search_image_patterns.txt
+    - assets/models/selfie_multiclass_256x256.tflite
+    # Bundled only for the hidden on-device self-eval (Settings, debug builds):
+    # it runs the real runtime over the same set tools/evaluate.py scores.
+    - tests/eval_set/labels.jsonl
+    - tests/eval_set/images/
+  fonts:
+    # Anek Latin is the type family the reference app ships as its
+    # "blocker_*" faces; titles, controls and labels are drawn with it.
+    - family: AnekLatin
+      fonts:
+        - asset: assets/fonts/AnekLatin-300.ttf
+          weight: 300
+        - asset: assets/fonts/AnekLatin-400.ttf
+          weight: 400
+        - asset: assets/fonts/AnekLatin-500.ttf
+          weight: 500
+        - asset: assets/fonts/AnekLatin-600.ttf
+          weight: 600
+        - asset: assets/fonts/AnekLatin-700.ttf
+          weight: 700
+    # Amiri is a SIL OFL-licensed Naskh typeface with full Arabic coverage.
+    # The bundled Latin faces carry no Arabic glyphs, so the Arabic name
+    # "بَصِيرَة" needs its own family to render consistently on every device.
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Amiri-Bold.ttf
+          weight: 700

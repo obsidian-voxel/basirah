@@ -1,0 +1,85 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.kotlin/
+
+# Local agent/build scratch
+*.apk
+*.aab
+.blockp_ref/
+
+# Release signing: never commit the keystore or its passwords.
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
+
+# Downloaded blocklist source (regenerate the index instead)
+tools/blocklists/porn.txt
+
+# Harness run evidence and build logs: regenerate with tools/harness/run_phase1.sh
+tools/harness/*.log
+tools/harness/probe/
+tools/harness/results/
+build_log*.txt
+tools/build_log*.txt
+
+# Research / training artifacts: never in git (GitHub rejects >100 MB files).
+# They stay on disk; the app bundles only the files listed in pubspec.yaml.
+saved_model_jdp8/
+saved_model_jdp8_v*/
+saved_model_nudenet/
+tools/saved_model_jdp8*/
+tools/jdp8*.onnx
+/data/
+assets/models/*.onnx
+assets/models/nsfw.tflite
+assets/models/nsfw_float16.tflite
+assets/models/nsfw_int4.tflite
+assets/models/nsfw_classifier.tflite
+assets/models/nudennet_*.tflite
+assets/models/gender.tflite
+assets/models/beard.tflite
+assets/models/pose_detection.tflite
+assets/models/pose_landmarks_detector.tflite

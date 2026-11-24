@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Basirah</string>
+    <string name="app_name_full">Basirah (بَصِيرَة)</string>
+    <string name="accessibility_description">Basirah checks what is on screen for explicit content and blurs it. Frames are processed on this device and never uploaded.</string>
+</resources>

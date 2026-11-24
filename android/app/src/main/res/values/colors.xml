@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher icon background and splash colour: Basirah's blue. -->
+    <color name="ic_launcher_background">#2F6FEB</color>
+    <color name="splash_background">#EAF1FE</color>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Basirah's mark: an abstract aperture of insight. Three concentric
+     circles - lens outline, iris ring and centre aperture dot - no points,
+     no star geometry, no animate being and no religious symbol. Circles are
+     expressed as <path> arcs because VectorDrawable has no <circle> element. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Lens outline (stroke). -->
+    <path
+        android:pathData="M 54,7 A 47 47 0 0 1 54,101 A 47 47 0 0 1 54,7"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="10.5"
+        android:strokeLineJoin="round" />
+    <!-- Iris ring (stroke). -->
+    <path
+        android:pathData="M 54,24 A 30 30 0 0 1 54,84 A 30 30 0 0 1 54,24"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7.4"
+        android:strokeLineJoin="round" />
+    <!-- Centre aperture dot (fill). -->
+    <path
+        android:pathData="M 54,39 A 15 15 0 0 1 54,69 A 15 15 0 0 1 54,39"
+        android:fillColor="#FFFFFF" />
+</vector>

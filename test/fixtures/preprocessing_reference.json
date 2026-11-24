@@ -1,0 +1,27 @@
+{
+  "size": 224,
+  "scale": 255.0,
+  "entries": {
+    "nsfw_000_1jJeP.jpg": {
+      "source_width": 2333,
+      "source_height": 3110,
+      "mean_r": 0.8183118104934692,
+      "mean_g": 0.5943087339401245,
+      "mean_b": 0.3176846504211426
+    },
+    "coco_000.jpg": {
+      "source_width": 427,
+      "source_height": 640,
+      "mean_r": 0.5846529006958008,
+      "mean_g": 0.47026529908180237,
+      "mean_b": 0.42775678634643555
+    },
+    "coco_020.jpg": {
+      "source_width": 333,
+      "source_height": 500,
+      "mean_r": 0.21713000535964966,
+      "mean_g": 0.19759640097618103,
+      "mean_b": 0.0970320999622345
+    }
+  }
+}

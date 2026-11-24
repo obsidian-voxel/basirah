@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Camera captures are written here by the system camera app. -->
+    <cache-path name="captures" path="captures/" />
+    <!-- Copies of picked gallery images, so they can outlive the picker URI. -->
+    <cache-path name="picked" path="picked/" />
+</paths>

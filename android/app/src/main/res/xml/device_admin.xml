@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No device policies are requested. Being an active admin is enough to make
+     casual uninstall harder; wipe/lock/password policies are never needed. -->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies />
+</device-admin>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Window content is required for the keyword/URL filter: without
+     canRetrieveWindowContent=true the node tree is always empty and keyword
+     blocking silently never fires. Screenshots drive the visual stage. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/accessibility_description"
+    android:canTakeScreenshot="true"
+    android:canRetrieveWindowContent="true"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeViewTextChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews|flagReportViewIds"
+    android:notificationTimeout="150"
+    android:settingsActivity="com.haramblur.haram_blur.MainActivity" />

@@ -1,0 +1,50 @@
+[15:22:48.46] Starting diagnostic build script 
+[15:22:48.46] PROJECT_DIR=C:\Users\H P\haram-blur 
+[15:22:48.49] FLUTTER_ROOT=C:\flutter 
+[15:22:48.51] JAVA_HOME=C:\Users\H P\jdk17\jdk-17.0.20+8 
+[15:22:48.53] ANDROID_HOME=C:\Android\sdk 
+[15:22:48.55] LOGFILE=C:\Users\H P\haram-blur\diagnostic_build_log.txt 
+[15:22:48.61] APK_PATH=C:\Users\H P\haram-blur\build\app\outputs\flutter-apk\app-debug.apk 
+[15:22:50.24] Checking if flutter.bat exists at C:\flutter\bin\flutter.bat 
+[15:22:50.24] Flutter found at C:\flutter\bin\flutter.bat 
+[15:22:52.62] Checking if java.exe exists at C:\Users\H P\jdk17\jdk-17.0.20+8\bin\java.exe 
+[15:22:52.63] Java found at C:\Users\H P\jdk17\jdk-17.0.20+8\bin\java.exe 
+[15:22:54.32] Checking if adb.exe exists at C:\Android\sdk\platform-tools\adb.exe 
+[15:22:54.38] ADB found at C:\Android\sdk\platform-tools\adb.exe 
+[15:22:55.51] Checking if pubspec.yaml exists at C:\Users\H P\haram-blur\pubspec.yaml 
+[15:22:55.51] pubspec.yaml found at C:\Users\H P\haram-blur\pubspec.yaml 
+[15:22:58.97] Checking if nsfw_classifier.tflite exists 
+[15:22:58.97] nsfw_classifier.tflite found 
+[15:23:00.10] Running: call "C:\flutter\bin\flutter.bat" --version 
+[15:23:00.10] Flutter version: 
+Flutter 3.44.8 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision 058e0af2c2 (4 months ago) • 2026-07-23 10:56:21 -0700
+Engine • hash 13ffd72b2f9a5ca4db2a74ea52d5353ec2e8f939 (revision 0cd610717b) (3 months ago) • 2026-07-23 16:11:34.000Z
+Tools • Dart 3.12.2 • DevTools 2.57.0
+[15:23:02.14] Flutter version check completed with errorlevel 0 
+[15:23:02.18] Exiting with error code 1 
+[15:24:41.79] Starting diagnostic build script 
+[15:24:41.79] PROJECT_DIR=C:\Users\H P\haram-blur 
+[15:24:41.80] FLUTTER_ROOT=C:\flutter 
+[15:24:41.82] JAVA_HOME=C:\Users\H P\jdk17\jdk-17.0.20+8 
+[15:24:41.83] ANDROID_HOME=C:\Android\sdk 
+[15:24:41.84] LOGFILE=C:\Users\H P\haram-blur\diagnostic_build_log.txt 
+[15:24:41.85] APK_PATH=C:\Users\H P\haram-blur\build\app\outputs\flutter-apk\app-debug.apk 
+[15:24:43.09] Checking if flutter.bat exists at C:\flutter\bin\flutter.bat 
+[15:24:43.10] Flutter found at C:\flutter\bin\flutter.bat 
+[15:24:43.93] Checking if java.exe exists at C:\Users\H P\jdk17\jdk-17.0.20+8\bin\java.exe 
+[15:24:43.93] Java found at C:\Users\H P\jdk17\jdk-17.0.20+8\bin\java.exe 
+[15:24:45.22] Checking if adb.exe exists at C:\Android\sdk\platform-tools\adb.exe 
+[15:24:45.22] ADB found at C:\Android\sdk\platform-tools\adb.exe 
+[15:24:46.02] Checking if pubspec.yaml exists at C:\Users\H P\haram-blur\pubspec.yaml 
+[15:24:46.02] pubspec.yaml found at C:\Users\H P\haram-blur\pubspec.yaml 
+[15:24:52.89] Checking if nsfw_classifier.tflite exists 
+[15:24:52.89] nsfw_classifier.tflite found 
+[15:24:55.01] Running: call "C:\flutter\bin\flutter.bat" --version 
+[15:24:55.01] Flutter version: 
+Flutter 3.44.8 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision 058e0af2c2 (4 months ago) • 2026-07-23 10:56:21 -0700
+Engine • hash 13ffd72b2f9a5ca4db2a74ea52d5353ec2e8f939 (revision 0cd610717b) (3 months ago) • 2026-07-23 16:11:34.000Z
+Tools • Dart 3.12.2 • DevTools 2.57.0
+[15:24:56.83] Flutter version check completed with errorlevel 0 
+[15:24:56.86] Exiting with error code 1 

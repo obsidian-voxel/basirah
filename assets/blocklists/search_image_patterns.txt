@@ -1,0 +1,21 @@
+# Image and video search result pages: the thumbnail grids where explicit
+# pictures surface. Blocked only while "Block image and video results" is
+# on (Advanced Settings -> Blocking). Matched against the URL only.
+*ask.com/images*
+*ask.com/video*
+*baidu.com/search/img*
+*baidu.com/video*
+*bing.com/images/search*
+*brave.com/search/images*
+*brave.com/search/videos*
+*duckduckgo.com/*iax=images*
+*ecosia.org/images*
+*ecosia.org/videos*
+*gibiru.com/results*type=image*
+*naver.com/search/image*
+*startpage.com/sp/search/image*
+*startpage.com/sp/search/video*
+*swisscows.com/en/image*
+*swisscows.com/en/video*
+*tbm=isch*
+*tbm=vid*
