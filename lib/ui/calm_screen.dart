@@ -7,11 +7,10 @@ import '../services/native_bridge.dart';
 import 'blockp_theme.dart';
 import 'brand_art.dart';
 
-/// Calm tab: BlockP's calm mode.
+/// Calm tab: one timer that locks everything except the apps you allow.
 ///
-/// A session locks every app that is not on the allow list until the timer
-/// runs out. The session state lives in [blurEngine]; this screen only drives
-/// it and shows what the engine reports, so a killed UI cannot fake a session.
+/// The session state lives in [blurEngine]; this screen only drives it and
+/// shows what the engine reports, so a killed UI cannot fake a session.
 class CalmScreen extends StatefulWidget {
   const CalmScreen({super.key});
 
@@ -174,38 +173,50 @@ class _CalmScreenState extends State<CalmScreen> {
         return Column(
           children: [
             Expanded(
-              flex: 44,
+              flex: 42,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   const CalmScene(),
-                  if (active)
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 18,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                  SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Calm mode',
+                            style: BpType.title.copyWith(
+                              fontSize: 22,
+                              color: Colors.white,
+                            ),
                           ),
-                          decoration: BoxDecoration(
-                            color: bp.canvas.withValues(alpha: 0.88),
-                            borderRadius: BorderRadius.circular(BpRadii.pill),
+                          const SizedBox(height: 2),
+                          Text(
+                            active
+                                ? 'Everything but your allowed apps is locked.'
+                                : 'A pause with the noise switched off.',
+                            style: BpType.body.copyWith(
+                              color: Colors.white.withValues(alpha: 0.75),
+                            ),
                           ),
-                          child: Text(
-                            'Calm mode · $minutesLeft min left',
-                            style: context.rowTitle.copyWith(fontSize: 15),
-                          ),
-                        ),
+                        ],
                       ),
                     ),
+                  ),
+                  Center(
+                    child: _TimerDial(
+                      active: active,
+                      minutes: active ? minutesLeft : _minutes,
+                      progress: active ? progress : 0,
+                    ),
+                  ),
                 ],
               ),
             ),
             Expanded(
-              flex: 56,
+              flex: 58,
               child: Container(
                 decoration: BoxDecoration(
                   color: bp.canvas,
@@ -214,142 +225,118 @@ class _CalmScreenState extends State<CalmScreen> {
                   ),
                 ),
                 child: SingleChildScrollView(
-                  // The floating tab bar overlays this sheet, so reserve room
-                  // for it at the end.
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 96),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
                   child: Column(
                     children: [
                       Container(
-                        width: 40,
+                        width: 38,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: bp.muted.withValues(alpha: 0.45),
+                          color: bp.muted.withValues(alpha: 0.35),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                       const SizedBox(height: 18),
-                      Text(
-                        active
-                            ? _durationLabel(minutesLeft)
-                            : _durationLabel(_minutes),
-                        style: context.display.copyWith(fontSize: 34),
-                      ),
-                      const SizedBox(height: 18),
-                      if (!active)
+                      if (!active) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Session length',
+                                style: context.rowTitle,
+                              ),
+                            ),
+                            Text(
+                              _durationLabel(_minutes),
+                              style: context.rowTitle.copyWith(
+                                color: bp.primary,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
                         _DurationSlider(
                           minutes: _minutes,
                           min: _minMinutes,
                           max: _maxMinutes,
                           onChanged: (value) =>
                               setState(() => _minutes = _clampMinutes(value)),
-                        )
-                      else
+                        ),
+                        const SizedBox(height: 14),
+                      ] else ...[
                         _SessionProgress(progress: progress),
-                      const SizedBox(height: 18),
+                        const SizedBox(height: 16),
+                      ],
                       BpCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
                         child: Column(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: Row(
+                            BpRow(
+                              icon: Icon(
+                                Icons.apps,
+                                size: 20,
+                                color: bp.primary,
+                              ),
+                              title: 'Allowed apps',
+                              description: _allowed.isEmpty
+                                  ? 'Nothing is allowed — a session locks '
+                                        'everything.'
+                                  : '${_allowed.length} app(s) stay usable '
+                                        'during a session.',
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.list_alt_rounded,
-                                    size: 24,
-                                    color: bp.ink,
+                                  _AllowedPreview(
+                                    labels: [
+                                      for (final package in _allowed.take(3))
+                                        _labelFor(package),
+                                    ],
                                   ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Text(
-                                      'Allowed apps (${_allowed.length})',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: context.rowTitle.copyWith(
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 68,
-                                    child: _AllowedPreview(
-                                      labels: [
-                                        for (final package in _allowed.take(3))
-                                          _labelFor(package),
-                                      ],
-                                    ),
-                                  ),
+                                  const SizedBox(width: 4),
                                   IconButton(
+                                    tooltip: 'Choose allowed apps',
                                     onPressed: active ? null : _pickAllowedApps,
                                     icon: Icon(
-                                      Icons.add,
-                                      size: 26,
-                                      color: active
-                                          ? bp.muted
-                                          : bp.ink,
+                                      Icons.add_circle_outline,
+                                      size: 22,
+                                      color: active ? bp.muted : bp.primary,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            Divider(height: 1, color: bp.divider),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.login_outlined,
-                                    size: 24,
-                                    color: bp.ink,
-                                  ),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Text(
-                                      'Prevent exit (Recommended)',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: context.rowTitle.copyWith(
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  ),
-                                  BpSwitch(
-                                    value: blurEngine.focusPreventExit,
-                                    onChanged: (value) async {
-                                      await blurEngine.setFocusPreventExit(
-                                        value,
-                                      );
-                                      if (!mounted) return;
-                                      setState(() {});
-                                    },
-                                  ),
-                                ],
+                            BpRow(
+                              icon: Icon(
+                                Icons.logout,
+                                size: 20,
+                                color: bp.primary,
                               ),
+                              title: 'Prevent exit',
+                              description: 'Recommended — the session cannot be '
+                                  'ended early.',
+                              trailing: BpSwitch(
+                                value: blurEngine.focusPreventExit,
+                                onChanged: (value) async {
+                                  await blurEngine.setFocusPreventExit(value);
+                                  if (!mounted) return;
+                                  setState(() {});
+                                },
+                              ),
+                              showDivider: false,
                             ),
                           ],
                         ),
                       ),
-                      if (_allowed.isEmpty && !active) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          'No app is allowed: a session locks everything.',
-                          textAlign: TextAlign.center,
-                          style: context.small,
-                        ),
-                      ],
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        width: 220,
-                        child: BpButton(
-                          label: active
-                              ? (blurEngine.focusPreventExit
+                      const SizedBox(height: 18),
+                      BpButton(
+                        label: active
+                            ? (blurEngine.focusPreventExit
                                   ? 'Session locked'
                                   : 'End Calm Mode')
-                              : 'Enter Calm Mode',
-                          onPressed: active
-                              ? (blurEngine.focusPreventExit ? null : _end)
-                              : _start,
-                        ),
+                            : 'Enter Calm Mode',
+                        onPressed: active
+                            ? (blurEngine.focusPreventExit ? null : _end)
+                            : _start,
                       ),
                     ],
                   ),
@@ -363,7 +350,92 @@ class _CalmScreenState extends State<CalmScreen> {
   }
 }
 
-/// Primary track with a pill thumb and a small origin dot, as in the reference.
+/// The remaining time inside a progress ring.
+class _TimerDial extends StatelessWidget {
+  final bool active;
+  final int minutes;
+  final double progress;
+
+  const _TimerDial({
+    required this.active,
+    required this.minutes,
+    required this.progress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final label = minutes >= 60
+        ? '${minutes ~/ 60}h ${(minutes % 60).toString().padLeft(2, '0')}m'
+        : '${minutes}m';
+    return SizedBox(
+      width: 176,
+      height: 176,
+      child: CustomPaint(
+        painter: _DialPainter(progress: progress.clamp(0.0, 1.0)),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: BpType.display.copyWith(
+                  fontSize: 34,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                active ? 'remaining' : 'ready',
+                style: BpType.small.copyWith(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DialPainter extends CustomPainter {
+  final double progress;
+
+  _DialPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.shortestSide / 2 - 4;
+    final track = Paint()
+      ..color = Colors.white.withValues(alpha: 0.18)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7
+      ..strokeCap = StrokeCap.round;
+    final value = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, track);
+    if (progress > 0) {
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -1.5708,
+        6.2832 * progress,
+        false,
+        value,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DialPainter oldDelegate) =>
+      oldDelegate.progress != progress;
+}
+
+/// A primary track with a round thumb.
 class _DurationSlider extends StatelessWidget {
   final int minutes;
   final int min;
@@ -382,58 +454,45 @@ class _DurationSlider extends StatelessWidget {
     final bp = context.bp;
     final fraction = ((minutes - min) / (max - min)).clamp(0.0, 1.0);
     return SizedBox(
-      height: 34,
+      height: 40,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final width = constraints.maxWidth;
-          final x = (width - 30) * fraction;
+          final x = (width - 22) * fraction;
+          void setFrom(double dx) {
+            final raw = (dx / width).clamp(0.0, 1.0);
+            final value = (min + raw * (max - min)).round();
+            onChanged((value / 15).round() * 15);
+          }
+
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onHorizontalDragUpdate: (details) {
-              final raw = details.localPosition.dx / width;
-              final value = (min + raw * (max - min)).round();
-              onChanged((value / 15).round() * 15);
-            },
-            onTapDown: (details) {
-              final raw = details.localPosition.dx / width;
-              final value = (min + raw * (max - min)).round();
-              onChanged((value / 15).round() * 15);
-            },
+            onHorizontalDragUpdate: (details) =>
+                setFrom(details.localPosition.dx),
+            onTapDown: (details) => setFrom(details.localPosition.dx),
             child: Stack(
               children: [
                 Positioned(
-                  left: 6,
-                  right: 6,
-                  top: 14,
+                  left: 4,
+                  right: 4,
+                  top: 17,
                   child: Container(
                     height: 6,
                     decoration: BoxDecoration(
-                      color: bp.primary.withValues(alpha: 0.22),
+                      color: bp.primary.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                 ),
                 Positioned(
-                  left: 6,
-                  top: 14,
-                  width: (x + 7).clamp(0.0, width - 12),
+                  left: 4,
+                  top: 17,
+                  width: (x + 4).clamp(0.0, width - 8),
                   child: Container(
                     height: 6,
                     decoration: BoxDecoration(
                       color: bp.primary,
                       borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  top: 10,
-                  child: Container(
-                    width: 22,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: bp.primary,
-                      borderRadius: BorderRadius.circular(7),
                     ),
                   ),
                 ),
@@ -441,10 +500,10 @@ class _DurationSlider extends StatelessWidget {
                   left: x,
                   top: 10,
                   child: Container(
-                    width: 14,
-                    height: 14,
+                    width: 20,
+                    height: 20,
                     decoration: BoxDecoration(
-                      color: bp.canvas,
+                      color: bp.card,
                       shape: BoxShape.circle,
                       border: Border.all(color: bp.primary, width: 3),
                     ),
@@ -472,14 +531,14 @@ class _SessionProgress extends StatelessWidget {
       child: LinearProgressIndicator(
         value: progress.clamp(0.0, 1.0),
         minHeight: 8,
-        backgroundColor: bp.primary.withValues(alpha: 0.2),
+        backgroundColor: bp.primary.withValues(alpha: 0.15),
         valueColor: AlwaysStoppedAnimation<Color>(bp.primary),
       ),
     );
   }
 }
 
-/// Up to three circular initials, matching the reference's app-icon preview.
+/// Up to three circular initials for the allowed apps.
 class _AllowedPreview extends StatelessWidget {
   final List<String> labels;
 
@@ -489,37 +548,38 @@ class _AllowedPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final bp = context.bp;
     if (labels.isEmpty) {
-      return Text(
-        'None',
-        textAlign: TextAlign.right,
-        style: context.small,
-      );
+      return Text('None', style: context.small);
     }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        for (var i = 0; i < labels.length; i++)
-          Transform.translate(
-            offset: Offset(-6.0 * i, 0),
-            child: Container(
-              width: 30,
-              height: 30,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: i.isEven ? bp.primary : bp.primarySoft,
-                shape: BoxShape.circle,
-                border: Border.all(color: bp.card, width: 2),
-              ),
-              child: Text(
-                labels[i].substring(0, 1).toUpperCase(),
-                style: BpType.nav.copyWith(
-                  color: i.isEven ? Colors.white : bp.ink,
-                  fontSize: 12,
+    return SizedBox(
+      width: 22.0 * labels.length + 4,
+      height: 28,
+      child: Stack(
+        children: [
+          for (var i = 0; i < labels.length; i++)
+            Positioned(
+              left: 18.0 * i,
+              top: 0,
+              child: Container(
+                width: 26,
+                height: 26,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: i.isEven ? bp.primary : bp.primarySoft,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: bp.card, width: 2),
+                ),
+                child: Text(
+                  labels[i].substring(0, 1).toUpperCase(),
+                  style: BpType.small.copyWith(
+                    color: i.isEven ? Colors.white : bp.ink,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

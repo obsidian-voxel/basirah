@@ -3,197 +3,143 @@ import 'package:flutter/material.dart';
 import 'blockp_theme.dart';
 import 'brand_art.dart';
 
-/// Premium tab.
+/// The "everything included" tab.
 ///
-/// The reference sells a subscription here. This build has no payment backend,
-/// no merchant account and no network permission, so there is nothing to buy
-/// and nothing to restore: the whole feature set ships unlocked. The screen
-/// keeps the reference layout (ticket, feature checklist, comparison) and
-/// replaces every price, review and publication logo with what is actually
-/// true of this app.
+/// The reference sells a subscription here, and the first rebuild reproduced
+/// its gold ticket, stars and perforation. There is no purchase flow, no
+/// merchant account and no INTERNET permission in this build, so a ticket that
+/// looks bought was pretending. What is left is the useful part: what the app
+/// does, what it replaces, and that it costs nothing.
 class PremiumScreen extends StatelessWidget {
   const PremiumScreen({super.key});
 
-  static const _features = <(IconData, String)>[
-    (Icons.block, 'Standard Blocking'),
-    (Icons.blur_on, 'Visual AI Blocking'),
-    (Icons.link, 'Accountability partner'),
-    (Icons.favorite_border, 'Social Media Blocking'),
-    (Icons.tune, 'Custom Redirects'),
-    (Icons.devices_outlined, 'Unlimited devices'),
+  static const _features = <(IconData, String, String)>[
+    (Icons.block, 'App, site and keyword blocking', 'Your lists, enforced'),
+    (Icons.blur_on, 'On-device screen blur', 'No frame leaves the phone'),
+    (Icons.timer_outlined, 'Hours and daily limits', 'Per app, per day'),
+    (Icons.nightlight_outlined, 'Calm sessions', 'One timer, everything else locked'),
+    (Icons.link, 'Accountability partner', 'A name and a local log'),
+    (Icons.wb_sunny_outlined, 'Morning affirmations', 'A pause before the phone opens'),
   ];
 
   static const _replaces = <(IconData, String, String)>[
-    (Icons.block, 'Adult Blocker', 'Picture and keyword filtering'),
-    (Icons.public_off_outlined, 'Website Blocker', 'Host-suffix matching'),
-    (Icons.apps, 'App Blocker', 'Package-level blocking'),
-    (Icons.filter_hdr_outlined, 'Focus Timer', 'Calm sessions'),
-    (Icons.link, 'Accountability Partner', 'Local partner log'),
+    (Icons.block, 'Adult blocker', 'Picture and keyword filtering'),
+    (Icons.public_off_outlined, 'Website blocker', 'Host-suffix matching'),
+    (Icons.apps, 'App blocker', 'Package-level blocking'),
+    (Icons.filter_hdr_outlined, 'Focus timer', 'Calm sessions'),
+    (Icons.link, 'Accountability partner', 'Local partner log'),
   ];
 
   @override
   Widget build(BuildContext context) {
     final bp = context.bp;
     return BpPage(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
       children: [
-        const Center(child: _Ticket()),
-        const SizedBox(height: 26),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Basirah', style: context.display.copyWith(fontSize: 28)),
-            const SizedBox(width: 10),
-            Text(
-              'بَصِيرَة',
-              textDirection: TextDirection.rtl,
-              style: BpType.arabic.copyWith(
-                fontSize: 26,
-                color: const Color(0xFFB08A3E),
-              ),
-            ),
-          ],
+        const BpHeader(
+          title: 'Everything included',
+          subtitle: 'No subscription, no account, no ads.',
         ),
-        const SizedBox(height: 18),
-        Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(
-              color: bp.primarySoft,
-              borderRadius: BorderRadius.circular(BpRadii.pill),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.verified_outlined, size: 20, color: bp.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'All features · no account',
-                  style: context.small.copyWith(
-                    color: bp.ink,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 22),
-        Divider(color: bp.divider),
-        const SizedBox(height: 18),
-        _Checklist(features: _features),
-        const SizedBox(height: 22),
-        Divider(color: bp.divider),
-        const SizedBox(height: 22),
-        Center(
-          child: Text(
-            'On Android, on your device',
-            style: context.rowTitle.copyWith(fontSize: 19),
-          ),
-        ),
-        const SizedBox(height: 18),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.android, size: 34, color: bp.ink),
-            const SizedBox(width: 10),
-            Text(
-              'Android 11+',
-              style: context.body.copyWith(color: bp.inkSoft),
-            ),
-          ],
-        ),
-        const SizedBox(height: 26),
-        Divider(color: bp.divider),
-        const SizedBox(height: 26),
-        RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            style: TextStyle(
-              fontFamily: BpType.family,
-              fontSize: 38,
-              fontWeight: FontWeight.w700,
-              height: 1.15,
-              color: bp.ink,
-            ),
+        _Hero(),
+        const BpSectionLabel('What is inside'),
+        BpCard(
+          child: Column(
             children: [
-              TextSpan(
-                text: 'One ',
-                style: TextStyle(color: bp.primary),
-              ),
-              const TextSpan(text: 'app to\nreplace them all.'),
+              for (var i = 0; i < _features.length; i++)
+                BpRow(
+                  icon: Icon(_features[i].$1, size: 19, color: bp.primary),
+                  title: _features[i].$2,
+                  description: _features[i].$3,
+                  trailing: Icon(
+                    Icons.check_circle,
+                    size: 20,
+                    color: bp.switchOn,
+                  ),
+                  showDivider: i != _features.length - 1,
+                ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        Center(
-          child: Text(
-            'Why pay for 12+ apps when one is enough?',
-            textAlign: TextAlign.center,
-            style: context.body.copyWith(fontSize: 17, color: bp.inkSoft),
-          ),
-        ),
-        const SizedBox(height: 24),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BpRadii.card),
-            border: Border.all(color: bp.muted.withValues(alpha: 0.35)),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        const BpSectionLabel('One app instead of many'),
+        BpCard(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (var i = 0; i < _replaces.length; i++)
+              Text(
+                'Why pay for 12+ apps when one is enough?',
+                style: context.title.copyWith(fontSize: 18),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Each of these ships inside Basirah, offline.',
+                style: context.body,
+              ),
+              const SizedBox(height: 8),
+              for (final item in _replaces)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 9),
                   child: Row(
                     children: [
-                      Icon(_replaces[i].$1, size: 26, color: bp.ink),
-                      const SizedBox(width: 16),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: bp.innerCard,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(item.$1, size: 17, color: bp.inkSoft),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _replaces[i].$2,
-                              style: context.rowTitle.copyWith(fontSize: 18),
+                              item.$2,
+                              style: context.rowTitle.copyWith(fontSize: 14.5),
                             ),
-                            Text(
-                              _replaces[i].$3,
-                              style: context.small.copyWith(fontSize: 15),
-                            ),
+                            Text(item.$3, style: context.small),
                           ],
                         ),
                       ),
-                      Icon(Icons.check, size: 24, color: bp.primary),
+                      Icon(Icons.check, size: 18, color: bp.primary),
                     ],
                   ),
                 ),
             ],
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 14),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           decoration: BoxDecoration(
-            color: bp.primarySoft,
+            color: bp.innerCard,
             borderRadius: BorderRadius.circular(BpRadii.card),
-            border: Border.all(color: bp.primary, width: 1.5),
+            border: Border.all(color: bp.divider),
           ),
           child: Row(
             children: [
-              Icon(Icons.receipt_long_outlined, size: 28, color: bp.ink),
-              const SizedBox(width: 14),
+              Icon(Icons.receipt_long_outlined, size: 22, color: bp.muted),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Total to pay',
-                  style: context.rowTitle.copyWith(fontSize: 19),
+                  style: context.rowTitle.copyWith(fontSize: 15),
                 ),
               ),
-              Text('Nothing', style: context.rowTitle.copyWith(fontSize: 20)),
+              Text(
+                'Nothing',
+                style: context.rowTitle.copyWith(
+                  fontSize: 18,
+                  color: bp.primary,
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 12),
         Text(
           'This build has no purchase flow, no subscription and no server. '
           'Every feature above is included and works offline; the price is '
@@ -206,190 +152,96 @@ class PremiumScreen extends StatelessWidget {
   }
 }
 
-/// The gold "Full Access" ticket, with the geometric mark where the reference
-/// puts its mascot.
-class _Ticket extends StatelessWidget {
-  const _Ticket();
-
+/// The headline card: the mark, one sentence, three facts.
+class _Hero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Transform.rotate(
-      angle: -0.04,
-      child: Container(
-        height: 230,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFE4CFA2), Color(0xFFCDB07A), Color(0xFFB6935A)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF8C6D3A).withValues(alpha: 0.28),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Perforation.
-            Positioned(
-              top: 16,
-              bottom: 16,
-              right: 74,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  for (var i = 0; i < 12; i++)
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF3E6CB),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        size: 15,
-                        color: Color(0xFF8A6B35),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Full Access',
-                        style: TextStyle(
-                          fontFamily: BpType.family,
-                          fontSize: 17,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF6E5327).withValues(alpha: 0.9),
-                        ),
-                      ),
-                      const Spacer(),
-                      Container(
-                        margin: const EdgeInsets.only(right: 60),
-                        child: Row(
-                          children: [
-                            for (var i = 0; i < 3; i++)
-                              const Icon(
-                                Icons.star,
-                                size: 11,
-                                color: Color(0xFF8A6B35),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Expanded(
-                    child: Center(
-                      child: BasirahMark(
-                        size: 128,
-                        color: const Color(0xFF5E4520),
-                        strokeWidth: 3,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'BASIRAH',
-                        style: TextStyle(
-                          fontFamily: BpType.family,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                          color: const Color(
-                            0xFF6E5327,
-                          ).withValues(alpha: 0.85),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'بَصِيرَة',
-                        textDirection: TextDirection.rtl,
-                        style: BpType.arabic.copyWith(
-                          fontSize: 14,
-                          color: const Color(
-                            0xFF6E5327,
-                          ).withValues(alpha: 0.85),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+    final dark = context.bpIsDark;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(BpRadii.card),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: dark
+              ? const [Color(0xFF1D3557), Color(0xFF152B45)]
+              : const [Color(0xFF1A5CE5), Color(0xFF123F9E)],
         ),
       ),
-    );
-  }
-}
-
-/// Feature list with the reference's pale blue rail and check marks.
-class _Checklist extends StatelessWidget {
-  final List<(IconData, String)> features;
-
-  const _Checklist({required this.features});
-
-  @override
-  Widget build(BuildContext context) {
-    final bp = context.bp;
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              children: [
-                for (final feature in features)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 9),
-                    child: Row(
-                      children: [
-                        Icon(feature.$1, size: 26, color: bp.ink),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            feature.$2,
-                            style: context.rowTitle.copyWith(fontSize: 18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              shape: BoxShape.circle,
+            ),
+            child: const BasirahMark(
+              size: 26,
+              color: Colors.white,
+              strokeWidth: 2.6,
             ),
           ),
-          const SizedBox(width: 12),
-          Container(
-            width: 54,
-            decoration: BoxDecoration(
-              color: bp.primarySoft,
-              borderRadius: BorderRadius.circular(27),
+          const SizedBox(height: 14),
+          Text(
+            'Your phone, on your terms.',
+            style: BpType.display.copyWith(
+              fontSize: 26,
+              color: Colors.white,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                for (var i = 0; i < features.length; i++)
-                  Icon(Icons.check, size: 24, color: bp.ink),
-              ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Everything Basirah can do is switched on from the first launch. '
+            'There is nothing to unlock.',
+            style: BpType.body.copyWith(
+              color: Colors.white.withValues(alpha: 0.82),
             ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final fact in const [
+                'Fully offline',
+                'No account',
+                'Android 11+',
+              ])
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check,
+                        size: 13,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        fact,
+                        style: BpType.small.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ],
       ),

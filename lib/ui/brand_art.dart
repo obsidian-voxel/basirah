@@ -67,155 +67,81 @@ class _MarkPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
 }
 
-/// The calm-mode scene: abstract night mountains, a moon disc and a tent.
+/// The calm-mode backdrop: a deep gradient field with two soft light pools.
 ///
-/// The reference draws a cartoon campsite with its dog mascot. The composition
-/// is kept (sky, peaks, tent, foreground slope) but every element is a plain
-/// geometric shape and the mascot is gone.
+/// The reference draws a cartoon campsite with its dog mascot, and the first
+/// rebuild copied it as flat mountains, a white disc and an orange tent. That
+/// read as clip art behind the timer, which is the actual subject of the
+/// screen, so the artwork is now just depth and light.
 class CalmScene extends StatelessWidget {
   const CalmScene({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _CalmPainter(isDark: Theme.of(context).brightness == Brightness.dark),
-      child: const SizedBox.expand(),
+    return const CustomPaint(
+      painter: _CalmPainter(),
+      child: SizedBox.expand(),
     );
   }
 }
 
 class _CalmPainter extends CustomPainter {
-  final bool isDark;
-
-  _CalmPainter({required this.isDark});
+  const _CalmPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
 
-    final sky = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: isDark
-            ? const [Color(0xFF1E3048), Color(0xFF2B4664), Color(0xFF35536F)]
-            : const [Color(0xFFCFE4FA), Color(0xFFE4F0FB), Color(0xFFF3EFE2)],
-      ).createShader(Rect.fromLTWH(0, 0, w, h));
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), sky);
-
-    // Moon / sun disc, high and small so it stays decorative.
-    final disc = Paint()
-      ..color = isDark
-          ? const Color(0xFFE9EFF6).withValues(alpha: 0.85)
-          : const Color(0xFFFFFFFF).withValues(alpha: 0.9);
-    canvas.drawCircle(Offset(w * 0.78, h * 0.20), w * 0.10, disc);
-
-    // Three mountain ridges, back to front. Each is one polyline through
-    // peaks and valleys, so the silhouettes read as ranges rather than
-    // isolated triangles.
-    _ridge(
-      canvas,
-      w,
-      h,
-      const [
-        (0.16, 0.34), (0.28, 0.46), (0.44, 0.24), (0.58, 0.44),
-        (0.74, 0.30), (0.90, 0.44),
-      ],
-      0.62,
-      isDark ? const Color(0xFF33506F) : const Color(0xFFA9C6E4),
-    );
-    _ridge(
-      canvas,
-      w,
-      h,
-      const [
-        (0.08, 0.56), (0.24, 0.68), (0.40, 0.44), (0.54, 0.64),
-        (0.70, 0.50), (0.86, 0.66),
-      ],
-      0.78,
-      isDark ? const Color(0xFF2A435F) : const Color(0xFF8FB3D8),
-    );
-    _ridge(
-      canvas,
-      w,
-      h,
-      const [
-        (0.04, 0.80), (0.20, 0.66), (0.34, 0.82), (0.50, 0.70),
-        (0.64, 0.84), (0.80, 0.72), (0.94, 0.82),
-      ],
-      0.90,
-      isDark ? const Color(0xFF22374E) : const Color(0xFF7599BF),
+    // A quiet navy field. The same in both themes: this is a night sky, and
+    // the timer sits on it in white either way.
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF15325C), Color(0xFF1A5CE5)],
+          stops: [0.0, 1.0],
+        ).createShader(rect),
     );
 
-    // Snow caps: two white wedges on the nearest peak.
-    final snow = Paint()..color = const Color(0xFFF7FBFF).withValues(alpha: 0.92);
-    canvas.drawPath(
-      Path()
-        ..moveTo(w * 0.40, h * 0.44)
-        ..lineTo(w * 0.465, h * 0.56)
-        ..lineTo(w * 0.433, h * 0.535)
-        ..lineTo(w * 0.40, h * 0.575)
-        ..lineTo(w * 0.372, h * 0.535)
-        ..lineTo(w * 0.338, h * 0.56)
-        ..close(),
-      snow,
+    // Two soft light pools, offset so the composition is not symmetrical.
+    canvas.drawCircle(
+      Offset(size.width * 0.82, size.height * 0.10),
+      size.width * 0.34,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.16),
+            Colors.white.withValues(alpha: 0.0),
+          ],
+        ).createShader(
+          Rect.fromCircle(
+            center: Offset(size.width * 0.82, size.height * 0.10),
+            radius: size.width * 0.34,
+          ),
+        ),
     );
-
-    // Tent: a triangle with a door slit, on the right third.
-    final tent = Paint()..color = isDark ? const Color(0xFFB8763F) : const Color(0xFFE0955A);
-    canvas.drawPath(
-      Path()
-        ..moveTo(w * 0.74, h * 0.42)
-        ..lineTo(w * 0.96, h * 0.80)
-        ..lineTo(w * 0.52, h * 0.80)
-        ..close(),
-      tent,
+    canvas.drawCircle(
+      Offset(size.width * 0.10, size.height * 0.92),
+      size.width * 0.40,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.09),
+            Colors.white.withValues(alpha: 0.0),
+          ],
+        ).createShader(
+          Rect.fromCircle(
+            center: Offset(size.width * 0.10, size.height * 0.92),
+            radius: size.width * 0.40,
+          ),
+        ),
     );
-    canvas.drawPath(
-      Path()
-        ..moveTo(w * 0.74, h * 0.50)
-        ..lineTo(w * 0.83, h * 0.80)
-        ..lineTo(w * 0.65, h * 0.80)
-        ..close(),
-      Paint()..color = isDark ? const Color(0xFF8F5A2F) : const Color(0xFFC97A44),
-    );
-
-    // Foreground slope.
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, h * 0.80)
-        ..quadraticBezierTo(w * 0.3, h * 0.74, w * 0.62, h * 0.82)
-        ..quadraticBezierTo(w * 0.84, h * 0.87, w, h * 0.81)
-        ..lineTo(w, h)
-        ..lineTo(0, h)
-        ..close(),
-      Paint()..color = isDark ? const Color(0xFF1B2B3C) : const Color(0xFFF5F9FF),
-    );
-  }
-
-  void _ridge(
-    Canvas canvas,
-    double w,
-    double h,
-    List<(double, double)> points,
-    double base,
-    Color color,
-  ) {
-    final path = Path()..moveTo(-w * 0.05, h * base);
-    for (final point in points) {
-      path.lineTo(w * point.$1, h * point.$2);
-    }
-    path
-      ..lineTo(w * 1.05, h * base)
-      ..lineTo(w * 1.05, h)
-      ..lineTo(-w * 0.05, h)
-      ..close();
-    canvas.drawPath(path, Paint()..color = color);
   }
 
   @override
-  bool shouldRepaint(_CalmPainter oldDelegate) => oldDelegate.isDark != isDark;
+  bool shouldRepaint(_CalmPainter oldDelegate) => false;
 }
 
 /// The "Finish setting up your app" strip's leading glyph.

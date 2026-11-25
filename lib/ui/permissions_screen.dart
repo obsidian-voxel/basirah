@@ -6,12 +6,13 @@ import 'blockp_theme.dart';
 import 'blockp_icons.dart';
 import 'brand_art.dart';
 
-/// The permission setup page, mirroring the reference's
-/// "Please Enable Permissions" screen: a mark, a reassurance, three switches
-/// and a short explanation of why each one is needed.
+/// The permission setup page: what Basirah needs from Android, why, and one
+/// action per requirement.
 ///
 /// Each switch opens the matching Android screen; the value shown is read back
-/// from the system, never assumed.
+/// from the system, never assumed. The page is the first thing a new install
+/// sees, so it says plainly that the app is offline and that every permission
+/// can be changed later.
 class PermissionsScreen extends StatefulWidget {
   /// Called by the first-run gate's Skip link. Pushed copies simply pop.
   final VoidCallback? onSkip;
@@ -42,6 +43,15 @@ class _PermissionsScreenState extends State<PermissionsScreen>
     if (state == AppLifecycleState.resumed) blurEngine.refreshStatus();
   }
 
+  void _skip() {
+    final onSkip = widget.onSkip;
+    if (onSkip != null) {
+      onSkip();
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
   Future<void> _grantAccessibility() async {
     final confirmed = await showBpDialog<bool>(
       context: context,
@@ -66,8 +76,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>
     final bp = context.bp;
     return Scaffold(
       backgroundColor: bp.canvas,
-      body: DecoratedBox(
-        decoration: context.bpCanvas,
+      body: BpCanvas(
         child: SafeArea(
           child: ListenableBuilder(
             listenable: blurEngine,
@@ -77,61 +86,69 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                   status.notificationsEnabled &&
                   status.batteryOptimizationIgnored;
               return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: widget.onSkip ??
-                            () => Navigator.of(context).maybePop(),
-                        child: Text('Skip', style: context.body),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'SETUP',
+                            style: BpType.eyebrow.copyWith(color: bp.muted),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _skip,
+                          child: Text('Skip', style: context.rowTitle),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Finish setting up',
+                      style: context.display,
                     ),
                     const SizedBox(height: 8),
+                    Text(
+                      'Android grants these three permissions itself. Basirah '
+                      'cannot switch them on for you, and shows their real '
+                      'state, not a promise.',
+                      style: context.body,
+                    ),
+                    const SizedBox(height: 20),
                     Center(
                       child: Container(
-                        width: 150,
-                        height: 150,
+                        width: 96,
+                        height: 96,
                         decoration: BoxDecoration(
                           color: bp.card,
                           shape: BoxShape.circle,
+                          border: Border.all(color: bp.divider),
                         ),
                         alignment: Alignment.center,
                         child: BasirahMark(
-                          size: 86,
+                          size: 52,
                           color: bp.primary,
-                          strokeWidth: 4,
+                          strokeWidth: 3.4,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 26),
-                    Text(
-                      'Please Enable Permissions',
-                      textAlign: TextAlign.center,
-                      style: context.display.copyWith(fontSize: 28),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Don't worry, we cannot see any of your personal data or "
-                      'your browsing history.',
-                      textAlign: TextAlign.center,
-                      style: context.body,
-                    ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     BpCard(
                       child: Column(
                         children: [
                           BpRow(
                             icon: BpAbstractIcon(
                               BpAbstractIcon.system,
-                              size: 24,
-                              color: bp.ink,
+                              size: 22,
+                              color: bp.primary,
                             ),
-                            title: 'Accessibility permission',
-                            description:
-                                'Shows the block screen and notices app changes',
+                            title: 'Accessibility',
+                            description: status.accessibilityEnabled
+                                ? 'Granted — the block screen can be drawn'
+                                : 'Needed to notice apps and draw the block '
+                                      'screen',
                             trailing: BpSwitch(
                               value: status.accessibilityEnabled,
                               onChanged: (_) => _grantAccessibility(),
@@ -140,7 +157,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                           BpRow.withIcon(
                             Icons.notifications_none,
                             title: 'Notifications',
-                            description: 'Warns you when protection stops',
+                            description: status.notificationsEnabled
+                                ? 'On — you are told when protection stops'
+                                : 'Tells you if protection stops running',
                             trailing: BpSwitch(
                               value: status.notificationsEnabled,
                               onChanged: (_) async {
@@ -152,8 +171,10 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                           ),
                           BpRow.withIcon(
                             Icons.battery_saver_outlined,
-                            title: 'Disable battery optimization',
-                            description: 'Lets the service keep running',
+                            title: 'Battery optimization',
+                            description: status.batteryOptimizationIgnored
+                                ? 'Exempt — Android will not sleep the service'
+                                : 'Exempting it keeps the service alive',
                             trailing: BpSwitch(
                               value: status.batteryOptimizationIgnored,
                               onChanged: (_) async {
@@ -168,22 +189,47 @@ class _PermissionsScreenState extends State<PermissionsScreen>
                       ),
                     ),
                     const SizedBox(height: 20),
-                    if (!status.accessibilityEnabled)
-                      BpButton(
-                        label: 'Enable accessibility',
-                        onPressed: _grantAccessibility,
-                      ),
                     if (allSet)
                       BpButton(
                         label: 'Continue',
-                        onPressed: () => Navigator.of(context).maybePop(),
+                        icon: Icons.check,
+                        onPressed: _skip,
+                      )
+                    else ...[
+                      BpButton(
+                        label: status.accessibilityEnabled
+                            ? 'Continue'
+                            : 'Enable accessibility',
+                        onPressed: status.accessibilityEnabled
+                            ? _skip
+                            : _grantAccessibility,
                       ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'You can always change these settings later, from '
-                      'Advanced Settings.',
-                      textAlign: TextAlign.center,
-                      style: context.small,
+                      const SizedBox(height: 10),
+                      BpOutlineButton(
+                        label: 'Do this later',
+                        onPressed: _skip,
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          size: 13,
+                          color: bp.muted.withValues(alpha: 0.8),
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'No internet permission · no account · nothing '
+                            'leaves this phone',
+                            style: context.small.copyWith(
+                              color: bp.muted.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

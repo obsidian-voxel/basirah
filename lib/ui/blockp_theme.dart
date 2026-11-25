@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'bp_nav_icons.dart';
 
-/// BlockP's design system, rebuilt for Basirah.
+/// Basirah's design system.
 ///
-/// Every colour, radius and type step below was measured from the reference
-/// screenshots (`shot_metrics.py` samples them out of the PNGs). The reference
-/// ships two themes — a navy canvas with slate cards, and a pale blue canvas
-/// with white cards — so the palette is a [ThemeExtension] and every widget
-/// reads it from the active theme instead of hard-coding one of them.
-///
-/// The reference app's own artwork (the dog mascot) is not reproduced; see
-/// `brand_art.dart` for the geometric replacement.
+/// BlockP was the starting point: the same five tabs, the same settings rows,
+/// the same blue. The measurements copied out of its screenshots (an arch cut
+/// out of a saturated gradient, fractional type sizes, a 294 dp mascot slot)
+/// were removed — they only made sense around artwork this app does not have.
+/// What is left is one palette, one type scale, one card, one row and one nav
+/// bar, so every screen is built from the same four pieces.
 @immutable
 class BpPalette extends ThemeExtension<BpPalette> {
   final Color canvas;
@@ -50,57 +48,47 @@ class BpPalette extends ThemeExtension<BpPalette> {
     required this.lock,
   });
 
-  /// Pale-blue canvas, white cards.
+  /// Cool off-white canvas, white cards, one confident blue.
   ///
-  /// These are the reference APK's own resource values, read out of
-  /// `resources.arsc` with `aapt2 dump resources`:
-  ///
-  /// * `background_color_dark`      `#E2EEFF`
-  /// * `blocker_card_background_color` `#F6FAFF`
-  /// * `blocker_button_color`       `#0076F4`
-  /// * `blocker_title_text_color`   `#002954`
-  /// * `blocker_text_desc_color`    `#595959`
-  /// * `blocker_divider_color`      `#B1B1B1`
+  /// Every text colour below clears 4.5:1 against the surface it is drawn on,
+  /// so the palette is readable before it is pretty.
   static const light = BpPalette(
-    canvas: Color(0xFFE2EEFF),
-    card: Color(0xFFF6FAFF),
-    innerCard: Color(0xFFFFFFFF),
-    ink: Color(0xFF002954),
-    inkSoft: Color(0xFF19456B),
-    muted: Color(0xFF595959),
-    primary: Color(0xFF0076F4),
-    primarySoft: Color(0xFFC7DCFB),
-    divider: Color(0xFFB1B1B1),
-    switchOn: Color(0xFF01BE5F),
-    switchOff: Color(0xFFD3D6DA),
-    // The reference draws both strips as translucent shapes over the canvas
-    // (`bg_essential_permissions_card` = #33FF5900, `edit_text_back_color` =
-    // #240076F4), so their sampled appearance depends on what is behind them.
-    warningBg: Color(0x33FF5900),
-    warningInk: Color(0xFFC76838),
-    bannerBg: Color(0x240076F4),
+    canvas: Color(0xFFF3F6FC),
+    card: Color(0xFFFFFFFF),
+    innerCard: Color(0xFFF4F7FD),
+    ink: Color(0xFF0C2340),
+    inkSoft: Color(0xFF27405F),
+    muted: Color(0xFF5A6B80),
+    primary: Color(0xFF1A5CE5),
+    primarySoft: Color(0xFFE4EDFF),
+    divider: Color(0xFFE6EDF8),
+    switchOn: Color(0xFF12A85C),
+    switchOff: Color(0xFFD7DEE9),
+    warningBg: Color(0xFFFFF3E4),
+    warningInk: Color(0xFF8F5210),
+    bannerBg: Color(0xFFE7EFFF),
     navBg: Color(0xFFFFFFFF),
-    lock: Color(0xFF002954),
+    lock: Color(0xFF0C2340),
   );
 
-  /// Navy canvas, slate cards. The reference's own night-mode resources.
+  /// Deep navy canvas, raised cards. The same hierarchy, not the same colours.
   static const dark = BpPalette(
-    canvas: Color(0xFF192432),
-    card: Color(0xFF223142),
-    innerCard: Color(0xFF20303F),
-    ink: Color(0xFFEFEFEF),
-    inkSoft: Color(0xFFD7E0EA),
-    muted: Color(0xFF8694A3),
-    primary: Color(0xFF2B77C7),
-    primarySoft: Color(0xFF1C304B),
-    divider: Color(0xFF8694A3),
-    switchOn: Color(0xFF01BE5F),
-    switchOff: Color(0xFF5A6168),
-    warningBg: Color(0x33FF5900),
-    warningInk: Color(0xFFD0895A),
-    bannerBg: Color(0x240076F4),
-    navBg: Color(0xFF223142),
-    lock: Color(0xFFFFFFFF),
+    canvas: Color(0xFF0C1521),
+    card: Color(0xFF16202D),
+    innerCard: Color(0xFF1C2735),
+    ink: Color(0xFFF2F6FB),
+    inkSoft: Color(0xFFCFDBE9),
+    muted: Color(0xFF93A2B5),
+    primary: Color(0xFF6FA0FF),
+    primarySoft: Color(0xFF1B2C47),
+    divider: Color(0xFF243040),
+    switchOn: Color(0xFF2FBF71),
+    switchOff: Color(0xFF394655),
+    warningBg: Color(0xFF33240F),
+    warningInk: Color(0xFFF0B26B),
+    bannerBg: Color(0xFF1A2B45),
+    navBg: Color(0xFF16202D),
+    lock: Color(0xFFF2F6FB),
   );
 
   @override
@@ -166,121 +154,108 @@ class BpPalette extends ThemeExtension<BpPalette> {
   }
 }
 
-/// Radii measured from the reference cards and pills.
+/// One corner scale: cards, nested panels, controls and the nav bar.
 abstract final class BpRadii {
-  /// Big content cards (streak, settings, feature lists).
-  static const card = 24.0;
+  /// Panels that hold a screen's content.
+  static const card = 22.0;
 
-  /// Secondary cards nested inside a big card.
-  static const inner = 16.0;
+  /// Panels nested inside a card.
+  static const inner = 14.0;
 
-  /// Full-round pills: buttons, day chips, the floating nav.
-  static const pill = 50.0;
+  /// Buttons, chips and segmented controls.
+  static const pill = 16.0;
 
-  /// The banner strips under the hero (permission warning, setup). The
-  /// reference draws them as fully-rounded stadiums.
-  static const banner = 28.0;
+  /// Banner strips.
+  static const banner = 16.0;
 
-  /// The floating nav pill is a stadium; its radius equals half its height.
-  static const nav = 32.0;
+  /// The bottom bar.
+  static const nav = 20.0;
 
   static const dialog = 24.0;
 }
 
-/// BlockP draws everything in one geometric sans. Anek Latin is bundled, so
-/// the clone uses the same family and the same size steps the reference uses.
+/// One type scale.
 ///
-/// The sizes below were solved against the reference's own `blocker_*` font
-/// files by matching rendered advance widths to the pixel spans measured in
-/// the screenshots, so they are the reference's sizes rather than guesses.
+/// Anek Latin is bundled with the app; Amiri is the fallback that carries
+/// Arabic. Sizes step 12.5 / 14 / 15 / 20 / 26 / 32 — no fractional sizes
+/// copied from another device's density bucket.
 abstract final class BpType {
   static const family = 'AnekLatin';
 
-  /// The Arabic name "بَصِيرَة".
-  ///
-  /// The bundled Latin faces carry no Arabic glyphs, so the Arabic wordmark
-  /// uses Amiri, a SIL OFL-licensed Naskh typeface.
+  /// The Arabic wordmark "بَصِيرَة".
   static const arabicFamily = 'Amiri';
 
   /// The Arabic wordmark, rendered right-to-left.
   static const arabic = TextStyle(
     fontFamily: arabicFamily,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: FontWeight.w700,
     height: 1.5,
   );
 
-  /// The dashboard's large mode title ("Off" / "Normal" / "Strict").
-  ///
-  /// The reference's `main_button_text_view` is `_20ssp` in `blocker_bold`.
-  /// The screenshot was taken on a 411 dp wide device, which selects the
-  /// `sw420dp` resource bucket where `_20ssp` resolves to 28 sp. Solving the
-  /// rendered ink width of "Off" against the reference gives 27.8 sp, which
-  /// confirms the bucket.
+  /// Page titles.
   static const display = TextStyle(
     fontFamily: family,
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: FontWeight.w700,
-    height: 1.1,
+    height: 1.15,
+    letterSpacing: -0.6,
   );
 
-  /// Section and card titles.
-  ///
-  /// The reference uses `_16ssp` in `blocker_medium` for these, which is
-  /// 22.4 sp on a 411 dp wide device.
+  /// Card and section titles.
   static const title = TextStyle(
     fontFamily: family,
-    fontSize: 22.4,
-    fontWeight: FontWeight.w500,
-    height: 1.2,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    height: 1.25,
+    letterSpacing: -0.2,
   );
 
-  /// Settings-row titles.
-  ///
-  /// The reference uses `_13ssp` in `blocker_medium`: 15.2 sp here.
+  /// Row titles.
   static const row = TextStyle(
     fontFamily: family,
-    fontSize: 15.2,
-    fontWeight: FontWeight.w500,
-    height: 1.2,
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
   );
 
   /// Body copy and descriptions.
-  ///
-  /// The reference uses `_13ssp` in `blocker_regular`: 15.2 sp here.
   static const body = TextStyle(
     fontFamily: family,
-    fontSize: 15.2,
+    fontSize: 13.5,
     fontWeight: FontWeight.w400,
-    height: 1.3,
+    height: 1.45,
   );
 
-  /// Secondary captions.
-  ///
-  /// The reference uses `_12ssp` in `blocker_regular`: 14 sp here.
+  /// Captions and metadata.
   static const small = TextStyle(
     fontFamily: family,
-    fontSize: 14,
+    fontSize: 12.5,
     fontWeight: FontWeight.w400,
-    height: 1.3,
+    height: 1.4,
+  );
+
+  /// Small caps section eyebrow.
+  static const eyebrow = TextStyle(
+    fontFamily: family,
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    height: 1.2,
+    letterSpacing: 0.9,
   );
 
   /// Bottom-navigation labels.
-  ///
-  /// The reference's nav labels are `_10ssp` in `blocker_medium`, which is
-  /// 10 sp on the 411 dp wide reference device. Solving the rendered ink
-  /// width of "Block list" against the reference capture gives 10 sp.
   static const nav = TextStyle(
     fontFamily: family,
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
+    fontSize: 10.5,
+    fontWeight: FontWeight.w600,
     height: 1.1,
   );
 
-  /// Pill-button labels.
+  /// Button labels.
   static const button = TextStyle(
     fontFamily: family,
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: FontWeight.w600,
     height: 1.2,
   );
@@ -294,175 +269,47 @@ extension BpTheme on BuildContext {
           ? BpPalette.dark
           : BpPalette.light);
 
+  bool get bpIsDark => Theme.of(this).brightness == Brightness.dark;
+
   TextStyle get display => BpType.display.copyWith(color: bp.ink);
   TextStyle get title => BpType.title.copyWith(color: bp.ink);
   TextStyle get rowTitle => BpType.row.copyWith(color: bp.ink);
   TextStyle get body => BpType.body.copyWith(color: bp.muted);
   TextStyle get small => BpType.small.copyWith(color: bp.muted);
 
-  /// The canvas gradient behind every tab.
+  /// The flat canvas used behind pushed screens.
   ///
-  /// The reference draws two stacked pieces (see `res/layout/fragment_dash.xml`):
-  ///
-  /// 1. `dashboard_top_gradient_back` — a shape drawable whose `gradient` runs
-  ///    `#BDDDFF` -> `#1160FF` at angle 270 (top to bottom), filling the
-  ///    ScrollView behind the whole page.
-  /// 2. `dashboard_centre_gradient_svg` — a 402 x 1119 dp vector path filled
-  ///    with the flat canvas colour `#E2EEFF`, whose top edge is a wide arch.
-  ///    It sits over the gradient and cuts a dome out of it, so the gradient's
-  ///    lower boundary is a curve, not a straight line.
-  ///
-  /// The arch path is reproduced verbatim in [BpCanvas] below.
-  BoxDecoration get bpCanvas {
-    final isDark = Theme.of(this).brightness == Brightness.dark;
-    return BoxDecoration(
-      color: bp.canvas,
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: isDark
-            ? const [Color(0xFF131D27), Color(0xFF0E151C)]
-            : const [Color(0xFFBDDDFF), Color(0xFF1160FF)],
-        stops: const [0.0, 0.38],
-      ),
-    );
-  }
+  /// A very soft light source at the top instead of the old saturated blue
+  /// ramp: content is the subject, not the background.
+  BoxDecoration get bpCanvas => BoxDecoration(
+    color: bp.canvas,
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: bpIsDark
+          ? const [Color(0xFF121C29), Color(0xFF0C1521)]
+          : const [Color(0xFFEAF1FE), Color(0xFFF3F6FC)],
+      stops: const [0.0, 0.42],
+    ),
+  );
 }
 
-/// The dashboard's canvas: the reference's blue gradient with the flat canvas
-/// colour arch cut out of it.
-///
-/// The reference stacks a gradient shape drawable behind a 402 x 1119 dp
-/// vector whose path is:
-///
-/// ```text
-/// M398.3,109C376.7,46.5 296.6,0 201,0C105.4,0 25.3,46.5 3.7,109
-/// C2.2,113.5 0.9,118 0,122.6V162.9V1167H402V162.9V122.6
-/// C401.1,118 399.8,113.5 398.3,109Z
-/// ```
-///
-/// The vector is 402 dp wide and centred, so its arch spans the middle of the
-/// screen while the gradient still shows at both edges.
+/// The canvas every tab sits on.
 class BpCanvas extends StatelessWidget {
   final Widget child;
 
   const BpCanvas({super.key, required this.child});
 
-  /// The vector's width in dp.
-  static const double archWidth = 402;
-
-  /// The vector's height in dp.
-  static const double archHeight = 1119;
-
-  /// Where the background gradient starts, in dp below the top of the screen.
-  ///
-  /// The reference's dashboard ScrollView begins below the status bar, so the
-  /// ramp starts 31 dp down rather than at the very top.
-  static const double _gradientTop = 31;
-
-  /// How far the background gradient runs, in dp.
-  ///
-  /// The ramp reaches #1160FF 51 dp past the bottom of the 2340 px screen,
-  /// which is a span of 923 dp.
-  static const double _gradientSpan = 923;
-
   @override
   Widget build(BuildContext context) {
-    final bp = context.bp;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Stack(
-      children: [
-        // The reference's `dashboard_top_gradient_back` is a plain #BDDDFF ->
-        // #1160FF shape at angle 270 that fills the dashboard's ScrollView.
-        // That view starts below the status bar and runs past the bottom of
-        // the screen, so on the 1080 x 2340 reference capture the ramp's
-        // #BDDDFF end sits at y = 82 px and its #1160FF end at y = 2454 px.
-        // The gradient is therefore laid out over that span rather than over
-        // the whole screen, which puts its colours where the reference has
-        // them.
-        Positioned(
-          top: -_gradientTop,
-          height: _gradientSpan,
-          left: 0,
-          right: 0,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: bp.canvas,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: isDark
-                    ? const [Color(0xFF131D27), Color(0xFF0E151C)]
-                    : const [Color(0xFFBDDDFF), Color(0xFF1160FF)],
-                stops: const [0.0, 1.0],
-              ),
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: CustomPaint(
-            painter: _ArchPainter(color: bp.canvas),
-          ),
-        ),
-        child,
-      ],
+    return DecoratedBox(
+      decoration: context.bpCanvas,
+      child: child,
     );
   }
 }
 
-class _ArchPainter extends CustomPainter {
-  final Color color;
-
-  _ArchPainter({required this.color});
-
-  /// Affine mapping from the vector's own coordinates to screen pixels.
-  ///
-  /// The three numbers were solved by least squares against the
-  /// blue-to-canvas boundary measured in
-  /// `Screenshot_20261116_000823_BlockP.jpg` (1080 x 2340): the boundary is
-  /// the last row at each column whose colour still matches the background
-  /// gradient. The fit reproduces that boundary with a 3.9 px RMS error and
-  /// a 15 px maximum.
-  static const double _horizontalScale = 2.72703;
-  static const double _verticalScale = 2.83937;
-  static const double _originY = 667.566;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // The reference screenshot is 1080 x 2340; scale the solved constants so
-    // the arch keeps its measured proportions on any screen height.
-    final referenceHeight = 2340.0;
-    final heightScale = size.height / referenceHeight;
-    final horizontalScale = _horizontalScale * size.width / 1080;
-    final verticalScale = _verticalScale * heightScale;
-    final originY = _originY * heightScale;
-    final apexX = size.width / 2;
-
-    double x(double vx) => apexX + (vx - 201) * horizontalScale;
-    double y(double vy) => originY + vy * verticalScale;
-
-    // Start at the right-hand shoulder, sweep over the apex and down the left
-    // side, then close the shape below the screen.
-    final path = Path()
-      ..moveTo(x(398.3), y(109))
-      ..cubicTo(x(376.7), y(46.5), x(296.6), y(0), apexX, y(0))
-      ..cubicTo(x(105.4), y(0), x(25.3), y(46.5), x(3.7), y(109))
-      ..cubicTo(x(2.2), y(113.5), x(0.9), y(118), x(0), y(122.6))
-      ..lineTo(x(0), size.height)
-      ..lineTo(x(402), size.height)
-      ..lineTo(x(402), y(122.6))
-      ..cubicTo(x(401.1), y(118), x(399.8), y(113.5), x(398.3), y(109))
-      ..close();
-
-    canvas.drawPath(path, Paint()..color = color);
-  }
-
-  @override
-  bool shouldRepaint(_ArchPainter oldDelegate) => oldDelegate.color != color;
-}
-
-/// A screen: canvas, safe area and the shared horizontal padding (16 dp, the
-/// reference's 48 px gutter at 3x).
+/// A screen: canvas, safe area, a consistent gutter and bottom room.
 class BpPage extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsets padding;
@@ -471,9 +318,7 @@ class BpPage extends StatelessWidget {
   const BpPage({
     super.key,
     required this.children,
-    // The floating bottom bar overlays the scroll area, so tabs reserve room
-    // for it at the end of the list.
-    this.padding = const EdgeInsets.fromLTRB(16, 8, 16, 104),
+    this.padding = const EdgeInsets.fromLTRB(16, 8, 16, 24),
     this.scrollable = true,
   });
 
@@ -489,20 +334,91 @@ class BpPage extends StatelessWidget {
     return BpCanvas(
       child: SafeArea(
         bottom: false,
-        child: scrollable
-            ? SingleChildScrollView(child: content)
-            : content,
+        child: scrollable ? SingleChildScrollView(child: content) : content,
       ),
     );
   }
 }
 
-/// White (or slate) rounded card, 28 dp radius, no border in the reference.
+/// A tab's title block: the page name, an optional one-line explanation, and
+/// an optional trailing action. Every tab starts with one so the screens read
+/// as siblings rather than as five different layouts.
+class BpHeader extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final Widget? leading;
+
+  const BpHeader({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    this.leading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 10, 2, 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (leading != null) ...[leading!, const SizedBox(width: 12)],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: context.title.copyWith(fontSize: 26)),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 3),
+                  Text(subtitle!, style: context.body),
+                ],
+              ],
+            ),
+          ),
+          if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+        ],
+      ),
+    );
+  }
+}
+
+/// Small caps label above a group of cards.
+class BpSectionLabel extends StatelessWidget {
+  final String text;
+  final Widget? trailing;
+
+  const BpSectionLabel(this.text, {super.key, this.trailing});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              text.toUpperCase(),
+              style: BpType.eyebrow.copyWith(
+                color: context.bp.muted.withValues(alpha: 0.9),
+              ),
+            ),
+          ),
+          ?trailing,
+        ],
+      ),
+    );
+  }
+}
+
+/// The one card: surface, hairline border, soft lift, optional tap.
 class BpCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final Color? color;
   final VoidCallback? onTap;
+  final Color? borderColor;
 
   const BpCard({
     super.key,
@@ -510,30 +426,48 @@ class BpCard extends StatelessWidget {
     this.padding = EdgeInsets.zero,
     this.color,
     this.onTap,
+    this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bp = context.bp;
     final radius = BorderRadius.circular(BpRadii.card);
-    return Material(
-      color: color ?? context.bp.card,
-      borderRadius: radius,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: padding, child: child),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color ?? bp.card,
+        borderRadius: radius,
+        border: Border.all(color: borderColor ?? bp.divider),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0C2340).withValues(
+              alpha: context.bpIsDark ? 0.28 : 0.05,
+            ),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
   }
 }
 
-/// A card with BlockP's blue section header (icon + title + hairline), then a
-/// list of rows. Used by Advanced Settings and the Premium feature list.
+/// A card with a header (icon, title, optional trailing) and a divided body.
 class BpSectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final List<Widget> children;
   final Color? iconColor;
+  final Widget? trailing;
 
   const BpSectionCard({
     super.key,
@@ -541,31 +475,34 @@ class BpSectionCard extends StatelessWidget {
     required this.title,
     required this.children,
     this.iconColor,
+    this.trailing,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bp = context.bp;
     return BpCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
             child: Row(
               children: [
-                Icon(
-                  icon,
-                  size: 26,
-                  color: iconColor ?? context.bp.primary,
+                _IconChip(
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: iconColor ?? bp.primary,
+                  ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(title, style: context.title),
-                ),
+                const SizedBox(width: 12),
+                Expanded(child: Text(title, style: context.title)),
+                ?trailing,
               ],
             ),
           ),
-          Divider(height: 1, color: context.bp.divider, indent: 18, endIndent: 18),
+          Divider(height: 1, color: bp.divider),
           ...children,
         ],
       ),
@@ -573,21 +510,42 @@ class BpSectionCard extends StatelessWidget {
   }
 }
 
-/// A Material icon at the size [BpRow] draws its leading glyph, coloured by
-/// the active palette.
-class _BpMaterialIcon extends StatelessWidget {
-  const _BpMaterialIcon(this.iconData);
+/// The tinted rounded square behind a row's leading glyph.
+class _IconChip extends StatelessWidget {
+  final Widget child;
 
-  final IconData iconData;
+  const _IconChip({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Icon(iconData, size: 24, color: context.bp.ink);
+    return Container(
+      width: 38,
+      height: 38,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.bp.primarySoft.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(11),
+      ),
+      child: child,
+    );
   }
 }
 
-/// One BlockP settings row: outline icon, 17 sp title, muted description and a
-/// trailing switch / chevron / lock.
+/// A Material icon drawn the way a row expects it.
+class _LeadIcon extends StatelessWidget {
+  const _LeadIcon(this.icon);
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(icon, size: 20, color: context.bp.primary);
+  }
+}
+
+/// One settings row: leading glyph, title, one-line description, and a
+/// trailing switch / chevron / value. Rows are the app's main unit of
+/// information, so the padding and the divider are fixed here once.
 class BpRow extends StatelessWidget {
   final Widget icon;
   final String title;
@@ -598,6 +556,7 @@ class BpRow extends StatelessWidget {
   final Color? iconColor;
   final IconData? trailingIcon;
   final Color? trailingIconColor;
+  final bool tintIcon;
 
   const BpRow({
     super.key,
@@ -610,6 +569,7 @@ class BpRow extends StatelessWidget {
     this.iconColor,
     this.trailingIcon,
     this.trailingIconColor,
+    this.tintIcon = true,
   });
 
   /// A row whose leading glyph is a Material icon.
@@ -624,7 +584,8 @@ class BpRow extends StatelessWidget {
     this.iconColor,
     this.trailingIcon,
     this.trailingIconColor,
-  }) : icon = _BpMaterialIcon(iconData);
+  }) : icon = _LeadIcon(iconData),
+       tintIcon = true;
 
   @override
   Widget build(BuildContext context) {
@@ -634,12 +595,23 @@ class BpRow extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 16, 14),
+            padding: const EdgeInsets.fromLTRB(16, 13, 14, 13),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                icon,
-                const SizedBox(width: 16),
+                if (tintIcon)
+                  _IconChip(
+                    child: DefaultTextStyle.merge(
+                      style: TextStyle(color: bp.primary),
+                      child: IconTheme.merge(
+                        data: IconThemeData(color: bp.primary),
+                        child: icon,
+                      ),
+                    ),
+                  )
+                else
+                  icon,
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,33 +628,27 @@ class BpRow extends StatelessWidget {
                   const SizedBox(width: 10),
                   trailing!,
                 ] else if (trailingIcon != null) ...[
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Icon(
                     trailingIcon,
-                    size: 26,
+                    size: 22,
                     color: trailingIconColor ?? bp.ink,
                   ),
                 ] else if (onTap != null) ...[
-                  const SizedBox(width: 10),
-                  Icon(Icons.chevron_right, size: 26, color: bp.ink),
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right, size: 22, color: bp.muted),
                 ],
               ],
             ),
           ),
         ),
-        if (showDivider)
-          Divider(
-            height: 1,
-            indent: 18,
-            endIndent: 18,
-            color: bp.divider,
-          ),
+        if (showDivider) Divider(height: 1, indent: 66, color: bp.divider),
       ],
     );
   }
 }
 
-/// The reference switch: a flat pill with a white thumb, no outline.
+/// A switch with a 48 dp touch target and a 44 x 26 track.
 class BpSwitch extends StatelessWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -695,33 +661,41 @@ class BpSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bp = context.bp;
+    final enabled = onChanged != null;
     return Semantics(
       toggled: value,
+      enabled: enabled,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onChanged == null ? null : () => onChanged!(!value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          curve: Curves.easeOut,
-          width: _width,
-          height: _height,
-          padding: const EdgeInsets.all(3),
-          decoration: BoxDecoration(
-            color: onChanged == null
-                ? bp.switchOff.withValues(alpha: 0.5)
-                : (value ? bp.switchOn : bp.switchOff),
-            borderRadius: BorderRadius.circular(_height / 2),
-          ),
-          child: AnimatedAlign(
-            duration: const Duration(milliseconds: 160),
-            curve: Curves.easeOut,
-            alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              width: _height - 6,
-              height: _height - 6,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+        onTap: enabled ? () => onChanged!(!value) : null,
+        child: SizedBox(
+          height: 48,
+          width: _width + 4,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOut,
+              width: _width,
+              height: _height,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: !enabled
+                    ? bp.switchOff.withValues(alpha: 0.5)
+                    : (value ? bp.switchOn : bp.switchOff),
+                borderRadius: BorderRadius.circular(_height / 2),
+              ),
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 160),
+                curve: Curves.easeOut,
+                alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: _height - 6,
+                  height: _height - 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
             ),
           ),
@@ -731,12 +705,8 @@ class BpSwitch extends StatelessWidget {
   }
 }
 
-/// The orange "Please enable essential permissions (N)" strip.
-///
-/// The reference's `dash_frag_permission_required_layout` draws
-/// `bg_essential_permissions_card` (#33FF5900 with a 50 dp radius) over the
-/// canvas. On the 1080 px reference screen the strip measures 986 x 138 px,
-/// i.e. 375.6 x 52.6 dp, with the title starting 38 dp from its left edge.
+/// The permission warning strip. Amber, not shouting: an icon, one line of
+/// text and a chevron.
 class BpWarningBanner extends StatelessWidget {
   final String title;
   final String message;
@@ -758,25 +728,29 @@ class BpWarningBanner extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          height: 52,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
           child: Row(
             children: [
-              const SizedBox(width: 20),
+              Icon(
+                Icons.error_outline,
+                size: 20,
+                color: bp.warningInk,
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   message.isEmpty ? title : '$title $message',
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: context.rowTitle.copyWith(
+                  style: BpType.body.copyWith(
                     color: bp.warningInk,
-                    fontSize: 18.2,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
               if (onTap != null)
-                Icon(Icons.chevron_right, size: 24, color: bp.warningInk),
-              const SizedBox(width: 16),
+                Icon(Icons.chevron_right, size: 20, color: bp.warningInk),
             ],
           ),
         ),
@@ -785,17 +759,19 @@ class BpWarningBanner extends StatelessWidget {
   }
 }
 
-/// Filled pill button (primary) with the reference's disabled treatment.
+/// Filled primary button.
 class BpButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final bool expand;
 
   const BpButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.icon,
+    this.expand = true,
   });
 
   @override
@@ -807,7 +783,7 @@ class BpButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 20, color: enabled ? Colors.white : bp.muted),
+          Icon(icon, size: 18, color: enabled ? Colors.white : bp.muted),
           const SizedBox(width: 8),
         ],
         Flexible(
@@ -822,24 +798,29 @@ class BpButton extends StatelessWidget {
         ),
       ],
     );
-    return Material(
-      color: enabled ? bp.primary : bp.primary.withValues(alpha: 0.38),
-      borderRadius: BorderRadius.circular(BpRadii.pill),
-      child: InkWell(
-        onTap: onPressed,
+    return SizedBox(
+      width: expand ? double.infinity : null,
+      child: Material(
+        color: enabled
+            ? bp.primary
+            : bp.switchOff.withValues(alpha: context.bpIsDark ? 0.5 : 0.7),
         borderRadius: BorderRadius.circular(BpRadii.pill),
-        child: Container(
-          height: 56,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: child,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(BpRadii.pill),
+          child: Container(
+            height: 52,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: child,
+          ),
         ),
       ),
     );
   }
 }
 
-/// Outlined pill, used for the onboarding sign-in-style buttons and dialogs.
+/// Outlined button for secondary choices and dialogs.
 class BpOutlineButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
@@ -856,20 +837,23 @@ class BpOutlineButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bp = context.bp;
     return Material(
-      color: Colors.transparent,
-      shape: StadiumBorder(side: BorderSide(color: bp.divider, width: 1.5)),
+      color: bp.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(BpRadii.pill),
+        side: BorderSide(color: bp.divider, width: 1.2),
+      ),
       child: InkWell(
         onTap: onPressed,
-        customBorder: const StadiumBorder(),
+        borderRadius: BorderRadius.circular(BpRadii.pill),
         child: Container(
-          height: 52,
+          height: 50,
           alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 20, color: bp.ink),
+                Icon(icon, size: 18, color: bp.ink),
                 const SizedBox(width: 8),
               ],
               Flexible(
@@ -887,8 +871,8 @@ class BpOutlineButton extends StatelessWidget {
   }
 }
 
-/// Two-to-three option segmented pill (Blocklist / Whitelist, Custom URL /
-/// Custom App). The active half is filled primary blue.
+/// Two or three mutually exclusive options in one track. The selected option
+/// is a raised card, which reads at a glance without a second accent colour.
 class BpSegmented extends StatelessWidget {
   final List<String> labels;
   final int index;
@@ -905,11 +889,12 @@ class BpSegmented extends StatelessWidget {
   Widget build(BuildContext context) {
     final bp = context.bp;
     return Container(
-      height: 50,
+      height: 48,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: bp.card,
-        borderRadius: BorderRadius.circular(BpRadii.pill),
-        border: Border.all(color: bp.primarySoft, width: 1.5),
+        color: bp.innerCard,
+        borderRadius: BorderRadius.circular(BpRadii.inner),
+        border: Border.all(color: bp.divider),
       ),
       child: Row(
         children: [
@@ -918,19 +903,34 @@ class BpSegmented extends StatelessWidget {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => onChanged(i),
-                child: Container(
-                  margin: const EdgeInsets.all(1),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  curve: Curves.easeOut,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: i == index ? bp.primary : Colors.transparent,
-                    borderRadius: BorderRadius.circular(BpRadii.pill),
+                    color: i == index ? bp.card : Colors.transparent,
+                    borderRadius: BorderRadius.circular(BpRadii.inner - 4),
+                    boxShadow: i == index
+                        ? [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF0C2340,
+                              ).withValues(alpha: 0.09),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Text(
                     labels[i],
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: BpType.button.copyWith(
-                      color: i == index ? Colors.white : bp.muted,
+                      color: i == index ? bp.ink : bp.muted,
+                      fontWeight: i == index
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                     ),
                   ),
                 ),
@@ -942,15 +942,12 @@ class BpSegmented extends StatelessWidget {
   }
 }
 
-/// The floating bottom bar: a stadium-shaped pill with five destinations.
+/// The bottom bar: five destinations, a tinted active chip, and a height that
+/// leaves the screen's content visible.
 ///
-/// Geometry measured from the reference screenshots (1080 px wide, 2.625
-/// px/dp):
-///
-/// * pill: x 34..1045 px (385.5 dp wide), 64 dp tall, 13 dp side margins
-/// * active slot: a blue stadium filling the pill's full inner height
-///   (75.4 x 60.2 dp) that carries a white glyph and a white label
-/// * inactive glyphs: 26 dp, outline style, drawn at the pill's upper third
+/// The old bar was a floating stadium with a 62.5 dp circle that overflowed
+/// its own top edge and covered the last card on every tab. It is docked now,
+/// and the scaffold reserves its height instead of overlaying content.
 class BpBottomBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onSelected;
@@ -961,15 +958,7 @@ class BpBottomBar extends StatelessWidget {
     required this.onSelected,
   });
 
-  /// Pill height in dp.
-  ///
-  /// The reference's floating nav card is a stadium whose top edge is at
-  /// y = 2012 px and whose bottom edge is at y = 2205 px on the 1080 x 2340
-  /// screen, i.e. 73.5 dp tall with a 51.4 dp bottom margin.
-  static const double pillHeight = 73.5;
-
-  /// The blue active indicator is a 62.5 dp circle in the reference.
-  static const double indicatorSize = 62.5;
+  static const double barHeight = 62;
 
   static const tabs = <(BpNavIcon, String)>[
     (BpNavIcon.dashboard, 'Dashboard'),
@@ -982,33 +971,28 @@ class BpBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bp = context.bp;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(13, 0, 13, 51.4),
-      child: Container(
-        height: pillHeight,
-        decoration: BoxDecoration(
-          color: bp.navBg,
-          borderRadius: BorderRadius.circular(pillHeight / 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            for (var i = 0; i < tabs.length; i++)
-              Expanded(
-                child: _NavItem(
-                  glyph: tabs[i].$1,
-                  label: tabs[i].$2,
-                  selected: i == index,
-                  onTap: () => onSelected(i),
+    return Container(
+      decoration: BoxDecoration(
+        color: bp.navBg,
+        border: Border(top: BorderSide(color: bp.divider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: barHeight,
+          child: Row(
+            children: [
+              for (var i = 0; i < tabs.length; i++)
+                Expanded(
+                  child: _NavItem(
+                    glyph: tabs[i].$1,
+                    label: tabs[i].$2,
+                    selected: i == index,
+                    onTap: () => onSelected(i),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1031,79 +1015,43 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bp = context.bp;
-    // The reference draws the active slot as a 62.5 dp blue circle that
-    // overflows the nav card's top edge, with the glyph and its label stacked
-    // inside it.
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Stack(
-        alignment: Alignment.topCenter,
-        clipBehavior: Clip.none,
-        children: [
-          // The selected slot is drawn entirely by the indicator below, so
-          // the inactive layer must not repeat its glyph and label.
-          if (!selected)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  BpNavGlyph(
-                    glyph: glyph,
-                    color: bp.ink,
-                    size: 28,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: BpType.nav.copyWith(color: bp.ink),
-                  ),
-                ],
-              ),
+    final color = selected ? bp.primary : bp.muted;
+    return Semantics(
+      selected: selected,
+      button: true,
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        child: Center(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: selected ? bp.primarySoft : Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
             ),
-          if (selected)
-            SizedBox(
-              width: BpBottomBar.indicatorSize,
-              height: BpBottomBar.indicatorSize,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: bp.primary,
-                  shape: BoxShape.circle,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BpNavGlyph(glyph: glyph, color: color, size: 22),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: BpType.nav.copyWith(color: color),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    BpNavGlyph(glyph: glyph, color: Colors.white, size: 28),
-                    const SizedBox(height: 2),
-                    // The active circle is narrower than the longest label, so
-                    // scale the text down instead of clipping it.
-                    SizedBox(
-                      width: BpBottomBar.indicatorSize - 8,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          softWrap: false,
-                          style: BpType.nav.copyWith(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Dialog shell matching the reference: white 24 dp card, 22 sp title, a
-/// hairline, then the content and a full-width blue Confirm pill.
+/// Dialog shell: a card, a title, the content, and one full-width action.
 Future<T?> showBpDialog<T>({
   required BuildContext context,
   required String title,
@@ -1118,29 +1066,24 @@ Future<T?> showBpDialog<T>({
       final bp = context.bp;
       return Dialog(
         backgroundColor: bp.card,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(BpRadii.dialog),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(title, style: context.title),
               const SizedBox(height: 16),
-              Divider(height: 1, color: bp.divider),
-              const SizedBox(height: 18),
-              content,
+              Flexible(child: SingleChildScrollView(child: content)),
               if (showActions) ...[
-                const SizedBox(height: 22),
-                SizedBox(
-                  height: 56,
-                  child: BpButton(
-                    label: confirmLabel,
-                    onPressed: () => Navigator.of(context).pop(result),
-                  ),
+                const SizedBox(height: 20),
+                BpButton(
+                  label: confirmLabel,
+                  onPressed: () => Navigator.of(context).pop(result),
                 ),
               ],
             ],
@@ -1151,34 +1094,50 @@ Future<T?> showBpDialog<T>({
   );
 }
 
-/// Shared empty state: muted icon, title, explanation.
+/// Shared empty state: tinted glyph, title, explanation and an optional action.
 class BpEmpty extends StatelessWidget {
   final IconData icon;
   final String title;
   final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   const BpEmpty({
     super.key,
     required this.icon,
     required this.title,
     required this.message,
+    this.actionLabel,
+    this.onAction,
   });
 
   @override
   Widget build(BuildContext context) {
     final bp = context.bp;
-    return Column(
-      children: [
-        Icon(icon, size: 44, color: bp.muted.withValues(alpha: 0.45)),
-        const SizedBox(height: 10),
-        Text(title, style: context.rowTitle),
-        const SizedBox(height: 4),
-        Text(
-          message,
-          textAlign: TextAlign.center,
-          style: context.small,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: bp.primarySoft.withValues(alpha: 0.8),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 26, color: bp.primary),
+          ),
+          const SizedBox(height: 14),
+          Text(title, style: context.title, textAlign: TextAlign.center),
+          const SizedBox(height: 6),
+          Text(message, textAlign: TextAlign.center, style: context.body),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 16),
+            BpOutlineButton(label: actionLabel!, onPressed: onAction),
+          ],
+        ],
+      ),
     );
   }
 }

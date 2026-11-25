@@ -68,7 +68,7 @@ class _AffirmationsScreenState extends State<AffirmationsScreen> {
             builder: (context, _) {
               final custom = blurEngine.customAffirmations;
               return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(14, 6, 14, 28),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

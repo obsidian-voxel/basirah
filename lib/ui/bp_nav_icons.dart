@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 /// * Dashboard - four rounded squares in a 2x2 arrangement
 /// * Block list - a rounded square holding two bullets and two dashes
 /// * Premium - a three-pointed crown over a baseline
-/// * Calm - a mountain summit carrying a flag
+/// * Calm - a timer dial, the same ring the calm screen counts down in
 /// * Support - a headphone band with two ear pads
 ///
 /// Every painter strokes with a round cap and a round join, matching the
@@ -183,39 +183,18 @@ class _NavGlyphPainter extends CustomPainter {
     );
   }
 
-  /// A mountain summit with a flag planted on top.
+  /// A timer dial: one ring, a hand to twelve and a hand to three.
+  ///
+  /// The old glyph was a mountain with a flag, copied from the reference
+  /// screenshots; at 22 dp the two slopes read as a pair of legs, which is
+  /// exactly the figurative shape this app avoids. A dial says "a session
+  /// with a clock on it" without drawing anything alive.
   void _calm(Canvas canvas, Paint stroke, Paint fill, double w, double h) {
-    final peak = Path()
-      ..moveTo(w * 0.12, h * 0.98)
-      ..lineTo(w * 0.42, h * 0.42)
-      ..lineTo(w * 0.58, h * 0.62)
-      ..lineTo(w * 0.68, h * 0.46)
-      ..lineTo(w * 0.88, h * 0.98);
-    canvas.drawPath(peak, stroke);
-
-    // The snow cap: a small zigzag under the summit.
-    final cap = Path()
-      ..moveTo(w * 0.29, h * 0.62)
-      ..lineTo(w * 0.42, h * 0.42)
-      ..lineTo(w * 0.55, h * 0.62)
-      ..lineTo(w * 0.49, h * 0.55)
-      ..lineTo(w * 0.42, h * 0.62)
-      ..lineTo(w * 0.36, h * 0.55)
-      ..close();
-    canvas.drawPath(cap, stroke);
-
-    // Flag pole and pennant.
-    canvas.drawLine(
-      Offset(w * 0.42, h * 0.42),
-      Offset(w * 0.42, h * 0.06),
-      stroke,
-    );
-    final flag = Path()
-      ..moveTo(w * 0.43, h * 0.08)
-      ..lineTo(w * 0.70, h * 0.13)
-      ..lineTo(w * 0.43, h * 0.22)
-      ..close();
-    canvas.drawPath(flag, fill);
+    final centre = Offset(w * 0.5, h * 0.52);
+    canvas.drawCircle(centre, w * 0.38, stroke);
+    canvas.drawLine(centre, Offset(w * 0.5, h * 0.24), stroke);
+    canvas.drawLine(centre, Offset(w * 0.70, h * 0.52), stroke);
+    canvas.drawCircle(centre, w * 0.07, fill);
   }
 
   /// A headphone band with two ear pads.

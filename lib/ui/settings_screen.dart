@@ -651,7 +651,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final blocked = blurEngine.filters.blockedApps.toSet();
               final mode = blurEngine.mode;
               return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(14, 6, 14, 28),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

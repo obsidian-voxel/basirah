@@ -5,17 +5,19 @@ import '../services/native_bridge.dart';
 import 'accountability_screen.dart';
 import 'affirmations_screen.dart';
 import 'blockp_theme.dart';
-import 'blockp_icons.dart';
 import 'brand_art.dart';
 import 'lock_gate.dart';
 import 'permissions_screen.dart';
 import 'protection_screen.dart';
 import 'settings_screen.dart';
 
-/// Dashboard: the protection state, the streak and the bypass-prevention
-/// switches, laid out like the reference app's home tab.
+/// Dashboard: what protection is doing right now, this week's streak, and the
+/// switches that decide what Basirah is allowed to enforce.
 ///
-/// The reference's dog mascot is replaced by [BasirahMark] (see brand_art.dart).
+/// The reference app spent the top half of this screen on a mascot slot. There
+/// is no mascot here, and an empty stage around a logo was the least useful
+/// thing on the page — so the mode lives in a real card the user can change
+/// without leaving the tab.
 class HomeScreen extends StatefulWidget {
   /// Used by rows that jump to another tab.
   final void Function(int index)? onOpenTab;
@@ -52,30 +54,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _pickMode() async {
-    final chosen = await showBpDialog<int>(
-      context: context,
-      title: 'Protection mode',
-      result: null,
-      showActions: false,
-      content: Column(
-        children: [
-          for (final mode in ProtectionMode.values)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: BpOutlineButton(
-                label: mode.label,
-                onPressed: () => Navigator.of(context).pop(mode.index),
-              ),
-            ),
-        ],
-      ),
-    );
-    if (chosen == null || !mounted) return;
-    final mode = ProtectionMode.values[chosen];
-    // Turning protection off is the one change worth slowing down: it needs
-    // the sentence (if set) and a deliberate wait.
-    if (mode == ProtectionMode.off &&
+  /// Applies a mode from the segmented control, with the same two guards the
+  /// old mode picker used: the sentence password, and a deliberate wait before
+  /// protection is switched off.
+  Future<void> _applyMode(ProtectionMode next) async {
+    if (next == blurEngine.mode) return;
+    if (next == ProtectionMode.off &&
         blurEngine.mode != ProtectionMode.off) {
       if (!await requireLongSentencePassword(context)) return;
       if (!mounted) return;
@@ -90,9 +74,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
       if (!ok) return;
     }
-    await blurEngine.setMode(mode);
+    await blurEngine.setMode(next);
     if (!mounted) return;
-    if (mode != ProtectionMode.off && !blurEngine.status.accessibilityEnabled) {
+    if (next != ProtectionMode.off && !blurEngine.status.accessibilityEnabled) {
       _snack('Enable the accessibility permission to protect the screen.');
     }
   }
@@ -113,12 +97,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _openSetup() async {
     await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-                        builder: (_) => const PermissionsScreen(),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const PermissionsScreen()),
     );
     if (!mounted) return;
     await blurEngine.refreshStatus();
+  }
+
+  void _push(Widget screen) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => screen),
+    );
   }
 
   @override
@@ -129,124 +117,145 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         final bp = context.bp;
         final status = blurEngine.status;
         final missing = [
-          if (!status.accessibilityEnabled) 'accessibility',
-          if (!status.notificationsEnabled) 'notifications',
-          if (!status.batteryOptimizationIgnored) 'battery',
+          if (!status.accessibilityEnabled) 1,
+          if (!status.notificationsEnabled) 1,
+          if (!status.batteryOptimizationIgnored) 1,
         ].length;
         final mode = blurEngine.mode;
 
         return BpPage(
-          // The reference's toolbar row sits 39 dp below the top edge. The
-          // banners use a 14 dp gutter (`marginHorizontal` on the APK's
-          // `dash_frag_permission_required_layout`), which is 37 px on the
-          // 1080 px reference screen.
-          padding: const EdgeInsets.fromLTRB(14, 38, 14, 28),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
           children: [
-            Row(
-              children: [
-                _CircleAction(
-                  child: BpAbstractIcon(
-                    BpAbstractIcon.bond,
-                    size: 30,
-                    color: bp.ink,
-                    strokeWidth: 2.1,
-                  ),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const AccountabilityScreen(),
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                // Basirah's wordmark: the Latin name beside its Arabic form.
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Basirah',
-                      style: context.title.copyWith(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                    Text(
-                      'بَصِيرَة',
-                      textDirection: TextDirection.rtl,
-                      style: BpType.arabic.copyWith(
-                        fontSize: 13,
-                        height: 1.1,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                _CircleAction(
-                  child: BpSettingsIcon(size: 32, color: bp.ink),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const SettingsScreen(),
-                    ),
-                  ),
-                ),
-              ],
+            const _BrandBar(),
+            const SizedBox(height: 18),
+            _StatusCard(
+              mode: mode,
+              missing: missing,
+              accessibility: status.accessibilityEnabled,
+              onModeChanged: _applyMode,
             ),
-            const SizedBox(height: 10),
-            _Hero(mode: mode, onTap: _pickMode),
             if (missing > 0) ...[
-              const SizedBox(height: 27),
-              BpWarningBanner(
-                title: 'Please enable essential permissions ($missing)',
-                message: '',
-                onTap: _openSetup,
-              ),
-              const SizedBox(height: 11),
+              const SizedBox(height: 12),
               _SetupBanner(
                 onTap: _openSetup,
-                label: 'Finish setting up your app',
+                label: missing == 1
+                    ? 'One permission left to finish setup'
+                    : '$missing permissions left to finish setup',
               ),
-              const SizedBox(height: 21),
             ],
+            const BpSectionLabel('This week'),
             _StreakCard(
               streak: blurEngine.currentStreak,
               days: blurEngine.weekEventFree,
               onTap: () => widget.onOpenTab?.call(4),
             ),
-            const SizedBox(height: 10),
-            _SettingsCard(
-              deviceAdmin: status.deviceAdmin,
-              onUninstall: _toggleUninstallProtection,
-              engine: blurEngine,
-              onAccountability: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const AccountabilityScreen(),
-                ),
+            const BpSectionLabel('Bypass prevention'),
+            BpCard(
+              child: Column(
+                children: [
+                  BpRow.withIcon(
+                    Icons.gpp_bad_outlined,
+                    title: 'Prevent Uninstall',
+                    description: status.deviceAdmin
+                        ? 'Device admin is active, so Basirah cannot be removed '
+                              'from Settings.'
+                        : 'Stop yourself from removing the app',
+                    trailing: BpSwitch(
+                      value: status.deviceAdmin,
+                      onChanged: _toggleUninstallProtection,
+                    ),
+                  ),
+                  BpRow.withIcon(
+                    Icons.download_for_offline_outlined,
+                    title: 'Block Newly Installed Apps',
+                    description: 'Anything installed from now on is blocked',
+                    trailing: BpSwitch(
+                      value: blurEngine.blockNewApps,
+                      onChanged: (value) =>
+                          blurEngine.setAdvanced(blockNewApps: value),
+                    ),
+                  ),
+                  BpRow.withIcon(
+                    Icons.travel_explore_outlined,
+                    title: 'Block Newly Installed Browsers',
+                    description: 'New browsers are blocked on sight',
+                    trailing: BpSwitch(
+                      value: blurEngine.blockNewBrowsers,
+                      onChanged: (value) =>
+                          blurEngine.setAdvanced(blockNewBrowsers: value),
+                    ),
+                    showDivider: false,
+                  ),
+                ],
               ),
-              onAffirmations: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const AffirmationsScreen(),
-                ),
-              ),
-              onAdvanced: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SettingsScreen(),
-                ),
-              ),
-              onProtection: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const ProtectionScreen(),
-                ),
-              ),
-              onCalm: () => widget.onOpenTab?.call(3),
             ),
-            const SizedBox(height: 14),
+            const BpSectionLabel('Manage'),
+            BpCard(
+              child: Column(
+                children: [
+                  BpRow.withIcon(
+                    Icons.filter_alt_outlined,
+                    title: 'Blocking rules',
+                    description: 'Apps, websites and keywords',
+                    onTap: () => widget.onOpenTab?.call(1),
+                  ),
+                  BpRow.withIcon(
+                    Icons.link_outlined,
+                    title: 'Accountability partner',
+                    description: 'A trusted person and a local log',
+                    onTap: () => _push(const AccountabilityScreen()),
+                  ),
+                  BpRow.withIcon(
+                    Icons.wb_sunny_outlined,
+                    title: 'Daily affirmations',
+                    description: 'A short morning reflection before the phone '
+                        'unlocks',
+                    onTap: () => _push(const AffirmationsScreen()),
+                  ),
+                  BpRow.withIcon(
+                    Icons.nightlight_outlined,
+                    title: 'Calm mode',
+                    description: 'Lock every app but the essentials for a while',
+                    onTap: () => widget.onOpenTab?.call(3),
+                  ),
+                  BpRow.withIcon(
+                    Icons.shield_outlined,
+                    title: 'Protection & device controls',
+                    description: 'Modes, device restrictions, restart and turn '
+                        'off',
+                    onTap: () => _push(const ProtectionScreen()),
+                  ),
+                  BpRow.withIcon(
+                    Icons.tune_outlined,
+                    title: 'Advanced Settings',
+                    description: 'Blocking layers, sensitivity and data',
+                    onTap: () => _push(const SettingsScreen()),
+                    showDivider: false,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
             Center(
-              child: Text(
-                'Fully offline · no account · no INTERNET permission',
-                style: context.small.copyWith(
-                  color: bp.muted.withValues(alpha: 0.75),
-                  fontSize: 11,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.lock_outline,
+                    size: 13,
+                    color: bp.muted.withValues(alpha: 0.8),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      'Fully offline · no account · no INTERNET permission',
+                      style: context.small.copyWith(
+                        color: bp.muted.withValues(alpha: 0.8),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -256,121 +265,210 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 }
 
-/// Circular white affordance used for the profile and settings buttons.
-/// The reference draws them 49.5 dp across, 38.5 dp below the top edge.
-class _CircleAction extends StatelessWidget {
-  final Widget child;
-  final VoidCallback onTap;
-
-  const _CircleAction({required this.child, required this.onTap});
+/// The top bar: the mark, the wordmark in both scripts, and Settings.
+class _BrandBar extends StatelessWidget {
+  const _BrandBar();
 
   @override
   Widget build(BuildContext context) {
     final bp = context.bp;
-    return Material(
-      color: bp.card,
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: 49.5,
-          height: 49.5,
-          child: Center(child: child),
+    return Row(
+      children: [
+        Container(
+          width: 46,
+          height: 46,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: bp.card,
+            shape: BoxShape.circle,
+            border: Border.all(color: bp.divider),
+          ),
+          child: BasirahMark(size: 24, color: bp.primary, strokeWidth: 2.6),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Basirah',
+                style: context.title.copyWith(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              Text(
+                'بَصِيرَة',
+                textDirection: TextDirection.rtl,
+                style: BpType.arabic.copyWith(
+                  fontSize: 12,
+                  height: 1.2,
+                  color: bp.muted,
+                ),
+              ),
+            ],
+          ),
+        ),
+        _CircleButton(
+          tooltip: 'Settings',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+          ),
+          child: Icon(Icons.settings_outlined, size: 21, color: bp.ink),
+        ),
+        const SizedBox(width: 8),
+        _CircleButton(
+          tooltip: 'Accountability partner',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => const AccountabilityScreen(),
+            ),
+          ),
+          child: Icon(Icons.people_outline, size: 21, color: bp.ink),
+        ),
+      ],
+    );
+  }
+}
+
+class _CircleButton extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  final String tooltip;
+
+  const _CircleButton({
+    required this.child,
+    required this.onTap,
+    required this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bp = context.bp;
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: bp.card,
+        shape: CircleBorder(side: BorderSide(color: bp.divider)),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Center(child: child),
+          ),
         ),
       ),
     );
   }
 }
 
-/// The mascot slot: a large disc with the geometric mark and the mode title.
-class _Hero extends StatelessWidget {
+/// The state of protection, and the control that changes it.
+class _StatusCard extends StatelessWidget {
   final ProtectionMode mode;
-  final VoidCallback onTap;
+  final int missing;
+  final bool accessibility;
+  final ValueChanged<ProtectionMode> onModeChanged;
 
-  const _Hero({required this.mode, required this.onTap});
+  const _StatusCard({
+    required this.mode,
+    required this.missing,
+    required this.accessibility,
+    required this.onModeChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     final bp = context.bp;
-    return Column(
-      children: [
-        // The reference's `rive_animation_block_btn` sits between the top-bar
-        // row (which ends 87 dp down) and the mode title (396 dp down), so the
-        // mascot slot is 309 dp tall.
-        SizedBox(
-          height: 294,
-          child: Stack(
-            alignment: Alignment.center,
+    final protected = accessibility && mode != ProtectionMode.off;
+    final accent = protected
+        ? const Color(0xFF12A85C)
+        : (missing > 0 ? bp.warningInk : bp.muted);
+    final label = protected
+        ? 'Protected'
+        : (missing > 0 ? 'Setup needed' : 'Not protecting');
+
+    return BpCard(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
               Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      bp.card.withValues(alpha: 0.95),
-                      bp.card.withValues(alpha: 0.0),
-                    ],
-                    stops: const [0.62, 1.0],
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'PROTECTION',
+                  style: BpType.eyebrow.copyWith(
+                    color: bp.muted,
+                    fontSize: 10.5,
                   ),
                 ),
               ),
-              BasirahMark(
-                size: 120,
-                color: mode == ProtectionMode.off ? bp.ink : bp.primary,
-                strokeWidth: 5,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  label,
+                  style: BpType.small.copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11.5,
+                  ),
+                ),
               ),
             ],
           ),
-        ),
-        Text(mode.label, style: context.display),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(BpRadii.pill),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _lineFor(mode),
-                  style: context.body.copyWith(color: bp.muted, fontSize: 18.2),
-                ),
-                const SizedBox(width: 6),
-                Icon(
-                  Icons.info_outline,
-                  size: 16,
-                  color: bp.muted.withValues(alpha: 0.8),
-                ),
-              ],
-            ),
+          const SizedBox(height: 6),
+          Text(mode.label, style: context.display.copyWith(fontSize: 32)),
+          const SizedBox(height: 4),
+          Text(_lineFor(mode, accessibility), style: context.body),
+          const SizedBox(height: 16),
+          BpSegmented(
+            labels: const ['Off', 'Normal', 'Strict'],
+            index: mode.index,
+            onChanged: (index) => onModeChanged(ProtectionMode.values[index]),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  String _lineFor(ProtectionMode mode) {
+  /// One honest sentence: what the mode means, and whether it is actually
+  /// running yet. Without the accessibility service nothing is enforced, so
+  /// the card must not claim otherwise.
+  String _lineFor(ProtectionMode mode, bool accessibility) {
+    if (!accessibility) {
+      return mode == ProtectionMode.off
+          ? 'Switched off, and setup is not finished yet.'
+          : 'Set up, but Android is not running the service yet.';
+    }
     switch (mode) {
       case ProtectionMode.off:
-        return 'Basirah is switched off';
+        return 'Basirah is switched off. Nothing is blocked.';
       case ProtectionMode.normal:
-        return 'Basirah is protecting you';
+        return 'Block lists, screen blur and time limits are enforcing.';
       case ProtectionMode.strict:
-        return 'Basirah is in strict mode';
+        return 'Maximum sensitivity, and bypass options are tightened.';
     }
   }
 }
 
-/// Blue "Finish setting up your app" stadium with the wrench-in-ring icon.
-///
-/// The reference's `dashboard_finish_setup_layout` measures 1000 x 166 px on
-/// the 1080 px screen, i.e. 381 x 63 dp: a `edit_text_back_color` (#240076F4)
-/// stadium over the canvas with a 33 dp `blocker_set_up_icon` at x = 40 dp,
-/// the title 55 dp further along and a trailing arrow.
+/// Blue "Finish setting up your app" strip.
 class _SetupBanner extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
@@ -386,23 +484,21 @@ class _SetupBanner extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          height: 63,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 13, 12, 13),
           child: Row(
             children: [
-              const SizedBox(width: 25),
-              BpSetupIcon(size: 27, color: bp.ink),
-              const SizedBox(width: 27),
+              BpSetupIcon(size: 22, color: bp.primary),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.rowTitle.copyWith(fontSize: 18.2),
+                  style: context.rowTitle,
                 ),
               ),
-              Icon(Icons.chevron_right, size: 24, color: bp.ink),
-              const SizedBox(width: 25),
+              Icon(Icons.arrow_forward, size: 18, color: bp.primary),
             ],
           ),
         ),
@@ -411,11 +507,7 @@ class _SetupBanner extends StatelessWidget {
   }
 }
 
-/// Streak card: header row plus the seven day circles.
-///
-/// The reference's header is a lightning bolt in a filled blue circle, the
-/// title, and a chevron; below it sits a one-line description and then the
-/// seven day pips.
+/// Streak card: the count, one line of context and the seven day pips.
 class _StreakCard extends StatelessWidget {
   final int streak;
   final List<bool> days;
@@ -432,40 +524,49 @@ class _StreakCard extends StatelessWidget {
     final bp = context.bp;
     return BpCard(
       onTap: onTap,
-      // The reference's streak card starts its bolt glyph 29 dp from the
-      // card's left edge (x = 117 px on a card that starts at x = 40 px),
-      // and its day circles 23 dp in.
-      padding: const EdgeInsets.fromLTRB(29, 29, 23, 16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              // The reference draws a bare outlined bolt glyph, not a filled
-              // blue disc.
-              Icon(
-                Icons.bolt_outlined,
-                size: 30,
-                color: bp.ink,
-              ),
-              const SizedBox(width: 21),
-              Expanded(
-                child: Text(
-                  streak > 0 ? '$streak-Day Streak' : 'Start your streak',
-                  style: context.title.copyWith(fontSize: 17.5),
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: bp.primarySoft,
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(
+                  Icons.bolt_rounded,
+                  size: 20,
+                  color: bp.primary,
                 ),
               ),
-              Icon(Icons.chevron_right, size: 22, color: bp.ink),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      streak > 0 ? '$streak-Day Streak' : 'Start your streak',
+                      style: context.rowTitle.copyWith(fontSize: 15.5),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      streak > 0
+                          ? 'Keep going — a day without a block counts.'
+                          : 'Reclaim your time and focus.',
+                      style: context.small,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, size: 20, color: bp.muted),
             ],
           ),
-          const SizedBox(height: 3),
-          Text(
-            streak > 0
-                ? 'Next badge in ${7 - (streak % 7)} days, great work!'
-                : 'Reclaim your time and focus.',
-            style: context.body.copyWith(fontSize: 17.1),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           _DayStrip(days: days),
         ],
       ),
@@ -484,10 +585,7 @@ class _DayStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final bp = context.bp;
     final now = DateTime.now();
-    // Sunday-first week, so the strip always ends on today.
     final start = now.subtract(Duration(days: now.weekday % 7));
-    // The reference draws seven 39 dp circles on a 49 dp pitch, spanning
-    // x = 101..979 px on the 1080 px screen.
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -498,29 +596,28 @@ class _DayStrip extends StatelessWidget {
               final isToday = i == now.weekday % 7;
               final done = i < days.length ? days[i] : false;
               return SizedBox(
-                width: 39,
+                width: 34,
                 child: Column(
                   children: [
                     Container(
-                      width: 39,
-                      height: 39,
+                      width: 34,
+                      height: 34,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isToday ? bp.primary : bp.card,
+                        color: isToday ? bp.primary : bp.innerCard,
                         border: Border.all(
-                          color: isToday ? bp.primary : bp.ink,
-                          width: 1.6,
+                          color: isToday ? bp.primary : bp.divider,
                         ),
                       ),
                       child: done && !isToday
-                          ? Icon(Icons.check, size: 22, color: bp.primary)
+                          ? Icon(Icons.check, size: 18, color: bp.primary)
                           : Text(
                               '${date.day}',
                               style: BpType.small.copyWith(
                                 color: isToday ? Colors.white : bp.ink,
-                                fontSize: 18.2,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                     ),
@@ -529,7 +626,8 @@ class _DayStrip extends StatelessWidget {
                       _letters[date.weekday % 7],
                       style: BpType.small.copyWith(
                         color: isToday ? bp.primary : bp.muted,
-                        fontSize: 14,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -538,106 +636,6 @@ class _DayStrip extends StatelessWidget {
             },
           ),
       ],
-    );
-  }
-}
-
-/// The dashboard's settings card, matching the reference row order.
-class _SettingsCard extends StatelessWidget {
-  final bool deviceAdmin;
-  final ValueChanged<bool> onUninstall;
-  final BlurEngine engine;
-  final VoidCallback onAccountability;
-  final VoidCallback onAffirmations;
-  final VoidCallback onAdvanced;
-  final VoidCallback onProtection;
-  final VoidCallback onCalm;
-
-  const _SettingsCard({
-    required this.deviceAdmin,
-    required this.onUninstall,
-    required this.engine,
-    required this.onAccountability,
-    required this.onAffirmations,
-    required this.onAdvanced,
-    required this.onProtection,
-    required this.onCalm,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bp = context.bp;
-    return BpCard(
-      child: Column(
-        children: [
-          BpRow.withIcon(
-            Icons.lock_outline,
-            title: 'Prevent Uninstall',
-            description: deviceAdmin
-                ? 'The Uninstalling of Basirah was blocked.'
-                : 'Stop yourself from removing the app',
-            trailing: BpSwitch(value: deviceAdmin, onChanged: onUninstall),
-          ),
-          BpRow.withIcon(
-            Icons.download_outlined,
-            title: 'Block Newly Installed Apps',
-            description: 'Apps in the future',
-            trailing: BpSwitch(
-              value: engine.blockNewApps,
-              onChanged: (value) => engine.setAdvanced(blockNewApps: value),
-            ),
-          ),
-          BpRow.withIcon(
-            Icons.public_outlined,
-            title: 'Block Newly Installed Browsers',
-            description: 'Browsers in the future',
-            trailing: BpSwitch(
-              value: engine.blockNewBrowsers,
-              onChanged: (value) => engine.setAdvanced(blockNewBrowsers: value),
-            ),
-          ),
-          BpRow(
-            icon: BpAbstractIcon(
-              BpAbstractIcon.bond,
-              size: 24,
-              color: bp.ink,
-            ),
-            title: 'Accountability partner',
-            description:
-                'You have chosen a trusted person to help you stay on track.',
-            onTap: onAccountability,
-          ),
-          BpRow.withIcon(
-            Icons.wb_sunny_outlined,
-            title: 'Daily Affirmations',
-            description:
-                'Your phone will be locked every morning, until affirmations '
-                'are spoken',
-            onTap: onAffirmations,
-          ),
-          BpRow.withIcon(
-            Icons.filter_hdr_outlined,
-            title: 'Calm Mode',
-            description: 'Lock every app but the essentials for a while',
-            onTap: onCalm,
-          ),
-          // The dashboard is the protection summary; this row opens the full
-          // report, the two modes and the device controls.
-          BpRow.withIcon(
-            Icons.shield_outlined,
-            title: 'Protection & device controls',
-            description: 'Modes, device restrictions, restart and turn off',
-            onTap: onProtection,
-          ),
-          BpRow.withIcon(
-            Icons.tune,
-            title: 'Advanced Settings',
-            description: 'Blocking layers, sensitivity and data',
-            onTap: onAdvanced,
-            showDivider: false,
-          ),
-        ],
-      ),
     );
   }
 }

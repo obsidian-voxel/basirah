@@ -129,7 +129,9 @@ class _RootShellState extends State<RootShell> with WidgetsBindingObserver {
                   return const MorningAffirmationsGate();
                 }
                 return Scaffold(
-                  extendBody: true,
+                  // The bar is docked, not floating: the scaffold reserves its
+                  // height so it never covers the last card on a tab.
+                  extendBody: false,
                   backgroundColor: context.bp.canvas,
                   body: IndexedStack(
                     index: _tab.index,

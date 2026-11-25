@@ -109,7 +109,7 @@ class AccountabilityScreen extends StatelessWidget {
               final alerts = blurEngine.settings.alerts;
               final log = blurEngine.settings.alertLog;
               return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(14, 6, 14, 28),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

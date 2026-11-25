@@ -122,6 +122,8 @@ class _BlockListScreenState extends State<BlockListScreen> {
     _snack('$domain will be blocked');
   }
 
+  static String _count(int items) => items == 1 ? '1 item' : '$items items';
+
   static String? _normaliseDomain(String raw) {
     var value = raw.trim().toLowerCase();
     value = value.replaceFirst(RegExp(r'^https?://'), '');
@@ -243,16 +245,23 @@ class _BlockListScreenState extends State<BlockListScreen> {
         final trustedSites = blurEngine.allowlistedDomains;
 
         return BpPage(
-          padding: const EdgeInsets.fromLTRB(14, 8, 14, 20),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
           children: [
+            BpHeader(
+              title: 'Your block list',
+              subtitle:
+                  '${_count(apps.length + sites.length + keywords.length + wholeWords.length)} '
+                  '· enforced when protection is on',
+            ),
             if (missing > 0) ...[
               BpWarningBanner(
-                title: 'Please provide permissions ($missing)',
-                message:
-                    'Essential permissions are required for this feature to '
-                    'work.',
+                title: missing == 1
+                    ? 'One essential permission is off'
+                    : '$missing essential permissions are off',
+                message: '',
+                onTap: null,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
             ],
             BpSegmented(
               labels: const ['Blocklist', 'Whitelist'],
@@ -302,18 +311,14 @@ class _BlockListScreenState extends State<BlockListScreen> {
                   await blurEngine.removeAllowlistedDomain(domain);
                 },
               ),
-            const SizedBox(height: 22),
-            Center(
-              child: SizedBox(
-                width: 210,
-                child: BpButton(
-                  label: 'Add Items',
-                  onPressed: _addItems,
-                ),
-              ),
+            const SizedBox(height: 18),
+            BpButton(
+              label: _tab == 0 ? 'Add Items' : 'Trust an app or site',
+              icon: Icons.add,
+              onPressed: _addItems,
             ),
             if (_tab == 0) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               Center(
                 child: Text(
                   'Blocked words: ${keywords.length} · blocked apps: '
@@ -511,87 +516,110 @@ class _BlocklistBody extends StatelessWidget {
     required this.onOpenPresets,
   });
 
-  /// "Blocked · allowed 00:00–00:00 · 30 min/day" under an app row.
+  /// The one line under an app row: the rules that apply, or none.
   String _appSubtitle(String package) {
     final window = schedules[package];
     final limit = limits[package] ?? 0;
-    final parts = <String>['Tap for hours & daily limit'];
-    if (window != null) parts.add('allowed ${window.label}');
-    if (limit > 0) parts.add('$limit min/day');
+    if (window == null && limit == 0) return 'No limits set';
+    final parts = <String>[];
+    if (window != null) parts.add('Allowed ${window.label}');
+    if (limit > 0) parts.add('$limit min a day');
     return parts.join(' · ');
   }
 
   @override
   Widget build(BuildContext context) {
-    final bp = context.bp;
     final empty =
         apps.isEmpty && sites.isEmpty && keywords.isEmpty && wholeWords.isEmpty;
-    return BpCard(
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
-      child: Column(
-        children: [
-          if (empty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(28, 60, 28, 60),
-              child: Text(
-                'Add any specific websites, apps or keywords you would like us '
-                'to block.',
-                textAlign: TextAlign.center,
-                style: context.body.copyWith(
-                  color: bp.muted.withValues(alpha: 0.8),
-                  fontSize: 17,
-                ),
-              ),
-            )
-          else ...[
-            for (final package in apps)
-              _ItemRow(
-                icon: Icons.apps,
-                title: _prettyPackage(package),
-                subtitle: _appSubtitle(package),
-                onTap: () => onEditRules(package),
-                onRemove: () => onRemoveApp(package),
-              ),
-            for (final domain in sites)
-              _ItemRow(
-                icon: Icons.public_off_outlined,
-                title: domain,
-                subtitle: 'Website · every subdomain',
-                onRemove: () => onRemoveSite(domain),
-              ),
-            for (final keyword in keywords.take(40))
-              _ItemRow(
-                icon: Icons.key_outlined,
-                title: keyword,
-                subtitle: 'Keyword',
-                onRemove: () => onRemoveKeyword(keyword),
-              ),
-            for (final keyword in wholeWords)
-              _ItemRow(
-                icon: Icons.key_outlined,
-                title: keyword,
-                subtitle: 'Keyword · whole word only',
-                onRemove: () => onRemoveWholeWord(keyword),
-              ),
-            if (keywords.length > 40)
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  '+${keywords.length - 40} more keywords',
-                  style: context.small,
-                ),
-              ),
-          ],
-          Divider(height: 1, color: bp.divider, indent: 16, endIndent: 16),
-          BpRow.withIcon(
+    if (empty) {
+      return BpCard(
+        child: BpEmpty(
+          icon: Icons.filter_alt_off_outlined,
+          title: 'Nothing blocked yet',
+          message:
+              'Add a website, an app or a keyword. Every match is enforced '
+              'whenever protection is on.',
+        ),
+      );
+    }
+    final keywordsAndWords = <(String, bool)>[
+      for (final keyword in keywords) (keyword, false),
+      for (final keyword in wholeWords) (keyword, true),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (apps.isNotEmpty) ...[
+          const _GroupLabel('Apps'),
+          BpCard(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                for (var i = 0; i < apps.length; i++)
+                  _ItemRow(
+                    icon: Icons.apps,
+                    title: _prettyPackage(apps[i]),
+                    subtitle: _appSubtitle(apps[i]),
+                    onTap: () => onEditRules(apps[i]),
+                    onRemove: () => onRemoveApp(apps[i]),
+                    showDivider: i != apps.length - 1,
+                  ),
+              ],
+            ),
+          ),
+        ],
+        if (sites.isNotEmpty) ...[
+          const _GroupLabel('Websites'),
+          BpCard(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                for (var i = 0; i < sites.length; i++)
+                  _ItemRow(
+                    icon: Icons.public_off_outlined,
+                    title: sites[i],
+                    subtitle: 'Every subdomain is covered',
+                    onRemove: () => onRemoveSite(sites[i]),
+                    showDivider: i != sites.length - 1,
+                  ),
+              ],
+            ),
+          ),
+        ],
+        if (keywordsAndWords.isNotEmpty) ...[
+          const _GroupLabel('Keywords'),
+          BpCard(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                for (var i = 0; i < keywordsAndWords.length; i++)
+                  _ItemRow(
+                    icon: Icons.key_outlined,
+                    title: keywordsAndWords[i].$1,
+                    subtitle: keywordsAndWords[i].$2
+                        ? 'Whole word only'
+                        : 'Anywhere in visible text',
+                    onRemove: () => keywordsAndWords[i].$2
+                        ? onRemoveWholeWord(keywordsAndWords[i].$1)
+                        : onRemoveKeyword(keywordsAndWords[i].$1),
+                    showDivider: i != keywordsAndWords.length - 1,
+                  ),
+              ],
+            ),
+          ),
+        ],
+        const _GroupLabel('Presets'),
+        BpCard(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: BpRow.withIcon(
             Icons.auto_stories_outlined,
             title: 'Keyword presets',
             description: 'Add a ready-made pack of terms',
             onTap: onOpenPresets,
             showDivider: false,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -625,6 +653,7 @@ class _ItemRow extends StatelessWidget {
   final String subtitle;
   final VoidCallback onRemove;
   final VoidCallback? onTap;
+  final bool showDivider;
 
   const _ItemRow({
     required this.icon,
@@ -632,6 +661,7 @@ class _ItemRow extends StatelessWidget {
     required this.subtitle,
     required this.onRemove,
     this.onTap,
+    this.showDivider = true,
   });
 
   @override
@@ -642,31 +672,70 @@ class _ItemRow extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
-          child: Row(
-            children: [
-              Icon(icon, size: 24, color: bp.ink),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: context.rowTitle.copyWith(fontSize: 16)),
-                    Text(subtitle, style: context.small),
-                  ],
+            padding: const EdgeInsets.fromLTRB(14, 9, 6, 9),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: bp.primarySoft.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Icon(icon, size: 20, color: bp.primary),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Remove',
-                onPressed: onRemove,
-                icon: Icon(Icons.close, size: 20, color: bp.muted),
-              ),
-            ],
-          ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.rowTitle,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.body,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Remove',
+                  onPressed: onRemove,
+                  icon: Icon(Icons.close, size: 20, color: bp.muted),
+                ),
+              ],
+            ),
           ),
         ),
-        Divider(height: 1, indent: 54, endIndent: 14, color: bp.divider),
+        if (showDivider)
+          Divider(height: 1, indent: 64, endIndent: 14, color: bp.divider),
       ],
+    );
+  }
+}
+
+/// Small caps label above a group of blocked items.
+class _GroupLabel extends StatelessWidget {
+  final String text;
+
+  const _GroupLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 16, 4, 6),
+      child: Text(
+        text.toUpperCase(),
+        style: BpType.eyebrow.copyWith(color: context.bp.muted),
+      ),
     );
   }
 }
@@ -686,44 +755,59 @@ class _WhitelistBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bp = context.bp;
     final empty = packages.isEmpty && sites.isEmpty;
-    return BpCard(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        children: [
-          if (empty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(28, 60, 28, 60),
-              child: Text(
-                'Apps and sites on this list are never blocked, even during a '
-                'calm session. A trusted site overrides the bundled adult-site '
-                'list, which is how a false positive is repaired.',
-                textAlign: TextAlign.center,
-                style: context.body.copyWith(
-                  color: bp.muted.withValues(alpha: 0.8),
-                  fontSize: 17,
-                ),
-              ),
-            )
-          else ...[
-            for (final package in packages)
-              _ItemRow(
-                icon: Icons.check_circle_outline,
-                title: _BlocklistBody._prettyPackage(package),
-                subtitle: package,
-                onRemove: () => onRemove(package),
-              ),
-            for (final domain in sites)
-              _ItemRow(
-                icon: Icons.verified_outlined,
-                title: domain,
-                subtitle: 'Trusted website · never blocked',
-                onRemove: () => onRemoveSite(domain),
-              ),
-          ],
+    if (empty) {
+      return BpCard(
+        child: BpEmpty(
+          icon: Icons.verified_user_outlined,
+          title: 'Nothing trusted yet',
+          message:
+              'Apps and sites on this list are never blocked, even during a '
+              'calm session. A trusted site also overrides the bundled '
+              'adult-site list, which is how a false positive is repaired.',
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (packages.isNotEmpty) ...[
+          const _GroupLabel('Trusted apps'),
+          BpCard(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                for (var i = 0; i < packages.length; i++)
+                  _ItemRow(
+                    icon: Icons.check_circle_outline,
+                    title: _BlocklistBody._prettyPackage(packages[i]),
+                    subtitle: packages[i],
+                    onRemove: () => onRemove(packages[i]),
+                    showDivider: i != packages.length - 1,
+                  ),
+              ],
+            ),
+          ),
         ],
-      ),
+        if (sites.isNotEmpty) ...[
+          const _GroupLabel('Trusted websites'),
+          BpCard(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                for (var i = 0; i < sites.length; i++)
+                  _ItemRow(
+                    icon: Icons.verified_outlined,
+                    title: sites[i],
+                    subtitle: 'Never blocked',
+                    onRemove: () => onRemoveSite(sites[i]),
+                    showDivider: i != sites.length - 1,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

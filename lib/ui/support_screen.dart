@@ -108,17 +108,26 @@ class SupportScreen extends StatelessWidget {
       listenable: blurEngine,
       builder: (context, _) {
         return BpPage(
-          padding: const EdgeInsets.fromLTRB(14, 16, 14, 24),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
           children: [
+            const BpHeader(
+              title: 'Answers & tools',
+              subtitle: 'Everything here runs on this device.',
+            ),
             BpCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
-                    child: Text('Help', style: context.title),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Text(
+                      'Why, how, and what it can see',
+                      style: context.body.copyWith(
+                        color: bp.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                  Divider(height: 1, color: bp.divider, indent: 18, endIndent: 18),
                   _HighlightRow(
                     icon: Icons.lock_outline,
                     title: 'Privacy note',
@@ -184,13 +193,15 @@ class SupportScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                     child: Text(
-                      'Frequently Asked Questions',
-                      style: context.title,
+                      'Questions',
+                      style: context.body.copyWith(
+                        color: bp.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  Divider(height: 1, color: bp.divider, indent: 18, endIndent: 18),
                   for (var i = 0; i < _faq.length; i++)
                     _FaqTile(
                       question: _faq[i].$1,
@@ -200,11 +211,11 @@ class SupportScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 20),
             Center(
               child: Text(
                 'Basirah 1.0.0 · offline build · no account',
-                style: context.small.copyWith(fontSize: 12),
+                style: context.small,
               ),
             ),
           ],
@@ -292,21 +303,31 @@ class _LinkRow extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 16, 14),
+            padding: const EdgeInsets.fromLTRB(14, 13, 12, 13),
             child: Row(
               children: [
-                Icon(icon, size: 26, color: bp.ink),
-                const SizedBox(width: 16),
+                Container(
+                  width: 38,
+                  height: 38,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: bp.primarySoft.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Icon(icon, size: 20, color: bp.primary),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: context.rowTitle),
+                      const SizedBox(height: 2),
                       Text(description, style: context.body),
                     ],
                   ),
                 ),
-                Icon(Icons.arrow_outward, size: 24, color: bp.ink),
+                Icon(Icons.arrow_outward, size: 20, color: bp.muted),
               ],
             ),
           ),
