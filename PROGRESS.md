@@ -8,7 +8,7 @@
 | Tests | `flutter test` | **88 passed, 1 skipped** |
 | Android unit tests | `./gradlew :app:testDebugUnitTest` | **14 passed** (6 new) |
 | Release APK | `flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64` | **exit 0** |
-| Signing | `apksigner verify --print-certs` | **v2/v3** (renamed to Basirah) |
+| Signing | `apksigner verify --print-certs` | **v3 only** on the 1.0.0 artifact (`v1`/`v2` false at minSdk 30), `CN=Haram Blur` |
 | Permissions | `aapt2 dump permissions` | only `RECEIVE_BOOT_COMPLETED`, `POST_NOTIFICATIONS`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` — **no INTERNET** |
 | UI renders | `flutter test test/ui_render_test.dart` | 16 PNGs in `build/ui-review/` |
 
@@ -25,6 +25,13 @@ rotate its signing key, so the signing config now sets v1 off, v2 and v3 on
 explicitly. REA re-read the rebuilt APK and reports v2 and v3 with the same
 certificate (`167e27d6…`), `schemes_agree_on_signer: true`, `self_consistent:
 true`, strongest scheme v3.
+
+Correction (2026-11-25): the 1.0.0 artifacts verify as **v3 only** —
+`apksigner -v` reports v1 false, v2 false, v3 true on the universal APK and
+on both per-ABI APKs. At minSdk 30 a v3 signature is all a device needs, and
+v3 is the scheme that carries the key-rotation lineage this paragraph was
+about, so the flag set above holds in spirit but not literally: apksigner
+does not add a v2 block when v3 alone already covers minSdk.
 
 `decode_android_resources` is still unavailable on this machine
 (`capability_unavailable`: apktool is not on the selected Windows PATH), so
@@ -620,3 +627,142 @@ Free disk space on the host, re-run `flutter build apk --debug` to green, then
 run the Device Owner procedure on a disposable AVD: provision, apply the
 restrictions, read each row back as *Active*, reboot, confirm Safe Mode is
 refused, remove the restrictions and confirm an uninstall works.
+
+## UI audit and redesign (2026-11-25)
+
+The previous pass copied BlockP pixel for pixel. On a real screen that read as
+someone else's app with the name filed off, and several of the copied
+measurements were actively broken:
+
+| What the replica did | Why it failed on screen | What replaced it |
+|---|---|---|
+| Arch cut out of a saturated blue gradient | The arch framed a 294 dp mascot slot this app has no artwork for, so the top third of every tab was empty chrome | One calm tinted canvas (`#F3F6FC` light, `#0C1521` dark), no arch, content starts at the top |
+| Fractional type sizes (18.2, 22.4, 15.2…) | Sizes copied from another device's density bucket; headings did not line up across tabs | One scale: 11 / 12.5 / 13.5 / 15 / 20 / 26 / 30 / 32 in AnekLatin |
+| Gold "Full Access" ticket with stars and perforation on Premium | Looked like a lottery ticket for an app that sells nothing; the text under it said everything is free | "Everything included" header, a plain hero with three facts, feature rows, "Total to pay — Nothing" |
+| Clip-art mountains, tent and sun on Calm | Decoration the app never earned, and a landscape that says nothing about a session timer | Navy-to-blue hero with the countdown dial (ring + remaining time) as the subject |
+| Floating nav stadium with a 62.5 dp circle that overflowed its own top edge | It covered the last card on **every** tab; `extendBody: true` let content slide under it | Docked bar, 62 dp, `extendBody: false`, scaffold reserves its height; the selected tab is a tinted chip |
+| Mountain-with-flag icon for Calm | At 22 dp the two slopes read as a pair of legs, i.e. a human figure, which the project's Sharia rules forbid | A timer dial: ring, two hands, centre dot |
+| Three stacked warnings for one missing permission on the dashboard | The same problem, said three times, in three colours | One setup banner with a count and an arrow; the status card states the truth once and never claims enforcement while the service is off |
+| "Please provide permissions (3) Essential permissions are required…" on Block list | Two sentences jammed together with no separator | "3 essential permissions are off" |
+
+Every screen is now built from the same pieces in `lib/ui/blockp_theme.dart`:
+`BpCanvas`, `BpPage`, `BpHeader`, `BpSectionLabel`, `BpCard`, `BpRow`,
+`BpSwitch`, `BpButton`, `BpOutlineButton`, `BpSegmented`, `BpEmpty`,
+`BpWarningBanner`, `BpBottomBar`. The public API of that file was kept, so the
+other screens and the test suite compile unchanged.
+
+### Verification
+
+| Check | Command | Result |
+|---|---|---|
+| Static analysis | `flutter analyze` / `dart analyze lib` | **No issues found!** |
+| Tests | `flutter test` | **102 passed, 1 skipped** |
+| UI renders | `flutter test test/ui_render_test.dart` | 20 PNGs in `build/ui-review/`, light and dark |
+| Debug APK | `flutter build apk --debug` | **exit 0**, installed on `emulator-5554` |
+| On device | `adb install -r` + `adb exec-out screencap` | Setup, dashboard, Block list, Premium, Calm and Support observed rendering on an android-36 x86_64 AVD; captures in `build/device/` |
+
+### What the emulator pass changed
+
+Running the app on a real Android surface found things the widget renders did
+not: the run-together permission banner, the repeated "No hours or daily limit"
+line on every app row, the calm glyph reading as a figure, and the Calm
+gradient's visible banding. The first three are fixed; the banding is a
+software-GPU artefact of the headless emulator and has not been seen on real
+hardware, so it is left as is rather than "fixed" blind.
+
+### Not verified
+
+- Still no physical device: overlay drawing, accessibility rebinding, the
+  Device Owner flow and the models under real camera/browser traffic remain
+  compiled-and-unit-tested, not observed.
+- The headless emulator's SystemUI ANRs under load (`-gpu swiftshader_indirect`).
+  That is the emulator, not the app: screenshots were taken after
+  `settings put global hide_error_dialogs 1` and `svc power stayon true`.
+- Committed and tagged as `v1.0.0`; see the release section at the end of this
+  file for the artifact and device evidence.
+
+## Release build and tag (2026-11-25)
+
+### Disk
+
+| Step | Free on `C:` |
+|---|---|
+| Start of session (host 99% full) | **4.6 GB** |
+| After deleting regenerable build output | **9.5 GB** |
+
+`build/` was 4.8 GB, of which `build/app` was 4.3 GB. Deleted only regenerable
+output: `build/app`, `build/flutter_litert`, `build/unit_test_assets`,
+`build/test_cache`, `build/jni`, `build/shared_preferences_android`,
+`.dart_tool`. Kept: source, `assets/models/nsfw_int8.tflite`, the release
+keystore and signing config, and the `build/device` / `build/ui-review`
+captures. No per-ABI split, native-merge change or off-volume build directory
+was needed: one cleanup pass made every build below run to completion.
+
+### Artifacts (signed, release)
+
+| File | Size (bytes) | versionCode | Role |
+|---|---|---|---|
+| `build/app/outputs/flutter-apk/app-release.apk` | 229,346,630 | 1 | universal (arm64-v8a, armeabi-v7a, x86_64) — the F-Droid artifact |
+| `build/app/outputs/bundle/release/app-release.aab` | 202,480,205 | 1 | Play upload; `flutter build appbundle --release` **exit 0** |
+| `app-arm64-v8a-release.apk` | 163,726,831 | 2001 | per-ABI split |
+| `app-x86_64-release.apk` | 169,887,553 | 4001 | per-ABI split, used for the emulator pass |
+
+All four read `versionName='1.0.0'`, `targetSdk 36`, package
+`com.haramblur.haram_blur`, matching `pubspec.yaml` (`version: 1.0.0+1`) and
+`docs/fdroid/com.haramblur.haram_blur.yml` (`versionName`, `versionCode: 1`,
+`commit: v1.0.0`). The universal APK keeps versionCode 1 because Flutter's
+per-ABI builds override it with 2001/4001.
+
+Signing: `apksigner verify` → **Verifies**, v3 true (v1 and v2 false, which is
+what minSdk 30 plus a v3 signature produces), `CN=Haram Blur, OU=Release,
+O=Haram Blur`. `jarsigner -verify` → **jar verified** for the AAB.
+
+Inside the universal APK: `assets/flutter_assets/assets/models/nsfw_int8.tflite`
+87,774,224 B, `assets/blocklists/adult_domains.idx` 7,618,080 B,
+`adult_url_patterns.txt`, the Amiri and AnekLatin fonts, and
+`lib/{arm64-v8a,armeabi-v7a,x86_64}/libapp.so`. The AAB carries the same assets
+plus `BUNDLE-METADATA/…debugsymbols/*.so.sym` for all three ABIs.
+
+### The release variant on a device
+
+First ever run of the minified build — R8, the ProGuard keeps for the Flutter
+plugins and the 84 MB tflite asset were all unproven in release. On
+`emulator-5554` (android-36, x86_64):
+
+- `adb install` → `Success`; `dumpsys package` reads back
+  `versionCode=1 versionName=1.0.0 minSdk=30 targetSdk=36`;
+- launch opens the setup page ("Finish setting up", three permission rows,
+  "Do this later") — the redesign, its icon fonts and its bundled assets all
+  survived minification;
+- "Do this later" lands on the dashboard: status card, "3 permissions left to
+  finish setup", the streak week with today marked, the bypass rows, and the
+  docked five-tab bar;
+- no `FATAL` / `AndroidRuntime` line in `logcat`, and the process stays alive
+  across both screens.
+
+Run twice: once with `app-x86_64-release.apk` and once with the universal
+`app-release.apk` (the artifact the recipe will download). Captures:
+`build/device/rel-01.png`, `rel-02.png`, `rel-03-universal.png`,
+`rel-04-universal-dashboard.png`.
+
+### Environment defect found and fixed
+
+`flutter build appbundle --release` first failed with "Release app bundle failed
+to strip debug symbols from native libraries" even though Gradle had reported
+`BUILD SUCCESSFUL` and the AAB was complete. `--verbose` showed the real cause:
+Flutter's post-build check shells out to
+`cmdline-tools/latest/bin/apkanalyzer.bat`, whose unquoted classpath splits on
+the space in `C:\Users\H P\Android\sdk` and dies with
+`ClassNotFoundException: P\Android\sdk\...`. A junction at `C:\dev\android-sdk`
+plus `flutter config --android-sdk C:\dev\android-sdk` gives the check a
+space-free path, and the bundle now finishes **exit 0**. That is a Windows
+path-with-space bug in the Android SDK helper script, not in Basirah.
+
+### Still open
+
+- No physical device: overlay drawing, accessibility rebinding and the Device
+  Owner flow are still compiled-and-tested rather than observed.
+- BlazeFace has still never been validated on a device.
+- F-Droid still needs a maintainer conversation about Flutter `srclibs` and
+  shipping an 84 MB model; the recipe itself now resolves, because the tag
+  exists.
